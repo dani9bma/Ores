@@ -108,10 +108,13 @@ int main(int argc, char *argv[])
 
 
 	//Clean up
+	Mix_FreeMusic(background);
+	SDL_DestroyTexture(message);
 	SDL_DestroyTexture(greenOre);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 
+	Mix_CloseAudio();
 	SDL_Quit();
 
 
