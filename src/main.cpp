@@ -6,6 +6,8 @@
 #include "sound.h"
 
 
+#define FLOOR_HEIGHT HEIGHT - 192 
+
 int main(int argc, char *argv[])
 {
 	bool bIsRunning = true;
@@ -18,6 +20,22 @@ int main(int argc, char *argv[])
 		printf("SDL_mixer could not be initialized: %s\n", SDL_GetError());
 		return 1;
 	}
+
+	//Background
+	Renderable backgroundImage;
+	backgroundImage.position = { 0, 0 };
+	backgroundImage.size = {WIDTH, HEIGHT};
+	backgroundImage.assetPath = "assets/background.bmp";
+
+	renderer.CreateRenderable(backgroundImage);
+
+	//Cloud
+	Renderable cloud;
+	cloud.size = { 336, 192};
+	cloud.position = { WIDTH - cloud.size.x, HEIGHT - cloud.size.y };
+	cloud.assetPath = "assets/cloud.bmp";
+
+	renderer.CreateRenderable(cloud);
 
 	//Green ore
 	Renderable greenOre;
@@ -53,12 +71,21 @@ int main(int argc, char *argv[])
 				bIsRunning = false;
 		}
 
-		if(playGameText.position.y < (HEIGHT - playGameText.size.y))
-			playGameText.position.y += 2;
+		if (greenOre.position.y < FLOOR_HEIGHT - greenOre.size.y)
+			greenOre.position.y += 4;
 
 		renderer.Clear();
 
 		//Render
+		renderer.Draw(backgroundImage);
+	
+		renderer.Draw(cloud);
+		cloud.position.x -= cloud.size.x - 50.0f;
+		renderer.Draw(cloud);
+		cloud.position.x -= cloud.size.x - 50.0f;
+		renderer.Draw(cloud);
+		cloud.position.x = WIDTH - cloud.size.x;
+
 		renderer.Draw(greenOre);
 		renderer.Draw(playGameText);
 
@@ -70,6 +97,8 @@ int main(int argc, char *argv[])
 	}
 
 	//Clean up
+	renderer.DestroyRenderable(backgroundImage);
+	renderer.DestroyRenderable(cloud);
 	renderer.DestroyRenderable(greenOre);
 	renderer.DestroyRenderable(playGameText);
 	
