@@ -19,8 +19,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	//TODO: Make a audio class
-
 	//Green ore
 	Renderable greenOre;
 	greenOre.position.x = WIDTH / 2;
@@ -32,7 +30,6 @@ int main(int argc, char *argv[])
 	renderer.CreateRenderable(greenOre);
 	
 	//Text
-
 	Renderable playGameText;
 	playGameText.assetPath = "assets/JFRocSol.ttf";
 	playGameText.position.x = WIDTH / 2;
@@ -43,7 +40,6 @@ int main(int argc, char *argv[])
 	renderer.CreateText(playGameText, { 155, 135, 12 }, "Play Game", 24);
 
 	//Audio
-
 	Sound background = Sound("assets/background.mp3");
 
 	background.Play(true);
@@ -73,11 +69,12 @@ int main(int argc, char *argv[])
 		printf("FPS: %f \n", 1000.0f / g_Timer.GetDeltaTime());
 	}
 
-
 	//Clean up
 	renderer.DestroyRenderable(greenOre);
 	renderer.DestroyRenderable(playGameText);
 	
+	background.Destroy();
+
 	Mix_CloseAudio();
 
 
