@@ -23,6 +23,7 @@ bool IsMouseOver(Renderable renderable)
 int main(int argc, char *argv[])
 {
 	bool bIsRunning = true;
+	bool MainMenu = true;
 
 	Renderer renderer;
 
@@ -81,6 +82,15 @@ int main(int argc, char *argv[])
 		if (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT)
 				bIsRunning = false;
+			if (event.type == SDL_MOUSEBUTTONDOWN)
+			{
+				if (event.button.button == SDL_BUTTON_LEFT)
+				{
+					if (IsMouseOver(playGameText))
+						MainMenu = false;
+				}
+			}
+
 		}
 
 		if (greenOre.position.y < FLOOR_HEIGHT - greenOre.size.y)
@@ -109,7 +119,8 @@ int main(int argc, char *argv[])
 			renderer.CreateText(playGameText, { 155, 135, 12 }, "Play Game", 24);
 		}
 			
-		renderer.Draw(playGameText);
+		if(MainMenu)
+			renderer.Draw(playGameText);
 
 		renderer.Update();
 
