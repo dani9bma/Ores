@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SDL_mixer.h>
 
 #define SHAPE_SIZE 32
 #define WIDTH 1280
 #define HEIGHT 720
+
 
 int main(int argc, char *argv[])
 {
@@ -15,6 +17,13 @@ int main(int argc, char *argv[])
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 	{
 		printf("SDL could not be initialized: %s\n", SDL_GetError());
+		return 1;
+	}
+
+	//Initialize SDL_mixer 
+	if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
+	{
+		printf("SDL_mixer could not be initialized: %s\n", SDL_GetError());
 		return 1;
 	}
 
@@ -37,6 +46,7 @@ int main(int argc, char *argv[])
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 	//TODO: Make a renderer class
+	//TODO: Make a audio class
 
 	//Texture
 	SDL_Rect size;
@@ -67,6 +77,17 @@ int main(int argc, char *argv[])
 	textRect.y = (HEIGHT / 2) + 100;
 	textRect.w = 300;
 	textRect.h = 100;
+
+	//Audio
+	Mix_Music* background = Mix_LoadMUS("assets/background.mp3");
+	if (!background)
+	{
+		printf("Could not load music: %s\n", SDL_GetError());
+		return 1;
+	}
+
+	if (Mix_PlayMusic(background, -1) == -1)
+		return -1;
 
 	while (bIsRunning) {
 		SDL_Event event;
