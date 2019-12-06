@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
 	SDL_Rect textRect;
 	textRect.x = WIDTH / 2;
-	textRect.y = (HEIGHT / 2) + 100;
+	textRect.y = 0;
 	textRect.w = 300;
 	textRect.h = 100;
 
@@ -89,7 +89,20 @@ int main(int argc, char *argv[])
 	if (Mix_PlayMusic(background, -1) == -1)
 		return -1;
 
+	//Timer
+	int maxFPS = 60;
+	int frameDelay = 1000 / maxFPS;
+
+	int frameStart = 0;
+	int frameTime = 0;
+	int lastFrame = 0;
+	float deltaTime;
+
 	while (bIsRunning) {
+		frameStart = SDL_GetTicks();
+		deltaTime = frameStart - lastFrame;
+		lastFrame = frameStart;
+
 		SDL_Event event;
 		if (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT)
@@ -99,11 +112,20 @@ int main(int argc, char *argv[])
 		//Render
 		SDL_RenderClear(renderer);
 
+		if(textRect.y < (HEIGHT - textRect.h))
+			textRect.y += 2.0f;
+
 		SDL_RenderCopy(renderer, message, NULL, &textRect);
 		SDL_RenderCopy(renderer, greenOre, &size, &position);
 		
-		
 		SDL_RenderPresent(renderer);
+
+
+		frameTime = SDL_GetTicks() - frameStart;
+		if (frameDelay > frameTime)
+			SDL_Delay(frameDelay - frameTime);
+
+		printf("FPS: %f \n", 1000.0f / deltaTime);
 	}
 
 
