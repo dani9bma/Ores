@@ -8,6 +8,18 @@
 
 #define FLOOR_HEIGHT HEIGHT - 192 
 
+bool IsMouseOver(Renderable renderable)
+{
+	//Check if mouse
+	int mouseX, mouseY;
+	SDL_GetMouseState(&mouseX, &mouseY);
+
+	return	(mouseX >= renderable.position.x &&
+		mouseX <= renderable.position.x + renderable.size.x &&
+		mouseY >= renderable.position.y &&
+		mouseY <= renderable.position.y + renderable.size.y);
+}
+
 int main(int argc, char *argv[])
 {
 	bool bIsRunning = true;
@@ -47,13 +59,13 @@ int main(int argc, char *argv[])
 
 	renderer.CreateRenderable(greenOre);
 	
-	//Text
+	//Text "Play Game"
 	Renderable playGameText;
 	playGameText.assetPath = "assets/JFRocSol.ttf";
-	playGameText.position.x = WIDTH / 2;
-	playGameText.position.y = 0;
 	playGameText.size.x = 300;
 	playGameText.size.y = 100;
+	playGameText.position.x = (WIDTH / 2) - (playGameText.size.x / 2);
+	playGameText.position.y = (HEIGHT / 2) - (playGameText.size.y / 2);
 
 	renderer.CreateText(playGameText, { 155, 135, 12 }, "Play Game", 24);
 
@@ -87,6 +99,16 @@ int main(int argc, char *argv[])
 		cloud.position.x = WIDTH - cloud.size.x;
 
 		renderer.Draw(greenOre);
+		
+		if (IsMouseOver(playGameText))
+		{
+			renderer.CreateText(playGameText, { 105, 85, 0 }, "Play Game", 24);
+		}
+		else
+		{
+			renderer.CreateText(playGameText, { 155, 135, 12 }, "Play Game", 24);
+		}
+			
 		renderer.Draw(playGameText);
 
 		renderer.Update();
