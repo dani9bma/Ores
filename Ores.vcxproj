@@ -45,14 +45,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)bin\intermediate\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)bin\intermediate\$(Configuration)</IntDir>
     <IncludePath>$(SolutionDir)external\SDL\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\SDL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)bin\intermediate\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)bin\intermediate\$(Configuration)</IntDir>
     <IncludePath>$(SolutionDir)external\SDL\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\SDL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -68,6 +68,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)external\SDL\SDL2.dll $(OutputPath)
+copy $(SolutionDir)external\SDL\SDL2_mixer.dll $(OutputPath)
+copy $(SolutionDir)external\SDL\SDL2_ttf.dll $(OutputPath)
+copy $(SolutionDir)external\SDL\zlib1.dll $(OutputPath)
+copy $(SolutionDir)external\SDL\libmpg123-0.dll $(OutputPath)
+copy $(SolutionDir)external\SDL\libfreetype-6.dll $(OutputPath)
+Xcopy /Y /I $(SolutionDir)assets $(OutputPath)assets</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -85,6 +94,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)external\SDL\SDL2.dll $(OutputPath)
+copy $(SolutionDir)external\SDL\SDL2_mixer.dll $(OutputPath)
+copy $(SolutionDir)external\SDL\SDL2_ttf.dll $(OutputPath)
+copy $(SolutionDir)external\SDL\zlib1.dll $(OutputPath)
+copy $(SolutionDir)external\SDL\libmpg123-0.dll $(OutputPath)
+copy $(SolutionDir)external\SDL\libfreetype-6.dll $(OutputPath)
+Xcopy /Y /I $(SolutionDir)assets $(OutputPath)assets</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\sound.cpp" />
