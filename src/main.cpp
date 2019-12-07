@@ -6,9 +6,25 @@
 #include "sound.h"
 
 
-#define FLOOR_HEIGHT HEIGHT - 192 
+#define FLOOR_HEIGHT HEIGHT - 192
+#define TEXT_COLOR { 155, 135, 12 }
+#define TEXT_COLOR_OVER { 105, 85, 0 }
 
-bool IsMouseOver(Renderable renderable)
+/* TODO:
+
+	-Add Restart Logic
+	
+	- Spawn Random Boxes from the sky, must be random
+	- Periodically, a new column of (random) boxes pushes all the columns sideways
+	- When a box is clicked, all adjacently connected boxes of the same color disappear
+		- Boxes are considered adjacent if they are vertically or horizontally next to each other
+		- All adjacent boxes should disappear, not only the immediately adjacent
+	- If there is a horizontal gap between two boxes, top boxes should collapse down filling the empty spaces
+	- If there is a vertical gap between two columns, boxes will collapse towards the spawn zone
+
+*/
+
+bool IsMouseOver(const Renderable& renderable)
 {
 	//Check if mouse
 	int mouseX, mouseY;
@@ -24,6 +40,7 @@ int main(int argc, char *argv[])
 {
 	bool bIsRunning = true;
 	bool MainMenu = true;
+	bool GameOver = false;
 
 	Renderer renderer;
 
@@ -59,16 +76,44 @@ int main(int argc, char *argv[])
 	greenOre.assetPath = "assets/green_ore.bmp";
 
 	renderer.CreateRenderable(greenOre);
-	
-	//Text "Play Game"
-	Renderable playGameText;
-	playGameText.assetPath = "assets/JFRocSol.ttf";
-	playGameText.size.x = 300;
-	playGameText.size.y = 100;
-	playGameText.position.x = (WIDTH / 2) - (playGameText.size.x / 2);
-	playGameText.position.y = (HEIGHT / 2) - (playGameText.size.y / 2);
 
-	renderer.CreateText(playGameText, { 155, 135, 12 }, "Play Game", 24);
+	//Restart Button
+	Renderable restartButton;
+	restartButton.size = { SHAPE_SIZE, SHAPE_SIZE };
+	restartButton.position = {WIDTH - SHAPE_SIZE, HEIGHT - SHAPE_SIZE};
+	restartButton.assetPath = "assets/restart_button.bmp";
+
+	renderer.CreateRenderable(restartButton);
+	
+	//Text "Game Over"
+	Renderable gameOverText;
+	gameOverText.assetPath = "assets/JFRocSol.ttf";
+	gameOverText.size.x = 300;
+	gameOverText.size.y = 90;
+	gameOverText.position.x = (WIDTH / 2) - (gameOverText.size.x / 2);
+	gameOverText.position.y = (HEIGHT / 2) - (gameOverText.size.y / 2);
+
+	renderer.CreateText(gameOverText, TEXT_COLOR, "Game Over", 24);
+
+	//Text "Play Game"
+	Renderable mainMenuText;
+	mainMenuText.assetPath = "assets/JFRocSol.ttf";
+	mainMenuText.size.x = 300;
+	mainMenuText.size.y = 90;
+	mainMenuText.position.x = (WIDTH / 2) - (mainMenuText.size.x / 2);
+	mainMenuText.position.y = (HEIGHT / 2) - (mainMenuText.size.y / 2);
+
+	renderer.CreateText(mainMenuText, TEXT_COLOR, "Play Game", 24);
+
+	//Text "Play Again"
+	Renderable playAgainText;
+	playAgainText.assetPath = "assets/JFRocSol.ttf";
+	playAgainText.size.x = 200;
+	playAgainText.size.y = 70;
+	playAgainText.position.x = (WIDTH / 2) - (playAgainText.size.x / 2);
+	playAgainText.position.y = ((HEIGHT / 2) - (playAgainText.size.y / 2)) + playAgainText.size.y;
+
+	renderer.CreateText(playAgainText, TEXT_COLOR, "Play Again", 20);
 
 	//Audio
 	Sound background = Sound("assets/background.mp3");
@@ -86,8 +131,17 @@ int main(int argc, char *argv[])
 			{
 				if (event.button.button == SDL_BUTTON_LEFT)
 				{
-					if (IsMouseOver(playGameText))
+					if (IsMouseOver(mainMenuText))
 						MainMenu = false;
+
+					if (IsMouseOver(restartButton))
+						printf("Logic needs to be added to the restart button\n");
+
+					if (IsMouseOver(playAgainText))
+					{
+						printf("Logic needs to be added to the restart button\n");
+						GameOver = false;
+					}
 				}
 			}
 
@@ -110,17 +164,28 @@ int main(int argc, char *argv[])
 
 		renderer.Draw(greenOre);
 		
-		if (IsMouseOver(playGameText))
-		{
-			renderer.CreateText(playGameText, { 105, 85, 0 }, "Play Game", 24);
-		}
+		//UI
+		if (IsMouseOver(mainMenuText))
+			renderer.CreateText(mainMenuText, TEXT_COLOR_OVER, "Play Game", 24);
 		else
-		{
-			renderer.CreateText(playGameText, { 155, 135, 12 }, "Play Game", 24);
-		}
+			renderer.CreateText(mainMenuText, TEXT_COLOR, "Play Game", 24);
 			
-		if(MainMenu)
-			renderer.Draw(playGameText);
+		if (MainMenu)
+			renderer.Draw(mainMenuText);
+		else
+			renderer.Draw(restartButton);
+
+		if (GameOver)
+		{
+			renderer.Draw(gameOverText);
+			
+			if(IsMouseOver(playAgainText))
+				renderer.CreateText(playAgainText, TEXT_COLOR_OVER, "Play Again", 20);
+			else
+				renderer.CreateText(playAgainText, TEXT_COLOR, "Play Again", 20);
+
+			renderer.Draw(playAgainText);
+		}
 
 		renderer.Update();
 
@@ -133,7 +198,8 @@ int main(int argc, char *argv[])
 	renderer.DestroyRenderable(backgroundImage);
 	renderer.DestroyRenderable(cloud);
 	renderer.DestroyRenderable(greenOre);
-	renderer.DestroyRenderable(playGameText);
+	renderer.DestroyRenderable(mainMenuText);
+	renderer.DestroyRenderable(playAgainText);
 	
 	background.Destroy();
 
