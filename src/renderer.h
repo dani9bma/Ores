@@ -1,9 +1,8 @@
 #pragma once
 
 #include <SDL.h>
-#include <vector>
 
-#define SHAPE_SIZE 64
+#define SHAPE_SIZE 48
 #define WIDTH 1280
 #define HEIGHT 720
 
