@@ -47,14 +47,14 @@
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediate\$(Configuration)\</IntDir>
     <IncludePath>$(SolutionDir)external\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\SDL\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)external\SDL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediate\$(Configuration)\</IntDir>
     <IncludePath>$(SolutionDir)external\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\SDL\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)external\SDL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
