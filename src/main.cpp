@@ -147,22 +147,28 @@ int main(int argc, char *argv[])
 
 		}
 
-		if (greenOre.position.y < FLOOR_HEIGHT - greenOre.size.y)
-			greenOre.position.y += 4;
-
 		renderer.Clear();
 
 		//Render
 		renderer.Draw(backgroundImage);
 	
 		renderer.Draw(cloud);
-		cloud.position.x -= cloud.size.x - 50.0f;
+		cloud.position.x -= cloud.size.x - 50;
 		renderer.Draw(cloud);
-		cloud.position.x -= cloud.size.x - 50.0f;
+		cloud.position.x -= cloud.size.x - 50;
 		renderer.Draw(cloud);
 		cloud.position.x = WIDTH - cloud.size.x;
 
-		renderer.Draw(greenOre);
+		//TODO: Make this a function to use in restart
+		//Spawn Ores from the sky
+		for (int i = 1; i <= 3; i++)
+		{
+			for (int j = 1; j <= 8; j++)
+			{
+				greenOre.position.y = (FLOOR_HEIGHT - (greenOre.size.y * j));
+				renderer.Draw(greenOre);
+			}
+		}
 		
 		//UI
 		if (IsMouseOver(mainMenuText))
