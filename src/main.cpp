@@ -16,6 +16,8 @@
 
 #define SPRITE_PER_COLUMN 8
 
+#define MAX_FRAMERATE 60
+
 //Global Variables
 Renderer renderer;
 std::vector<Renderable> renderables;
@@ -35,9 +37,6 @@ bool bIsTimeToPush = false;
 		- All adjacent boxes should disappear, not only the immediately adjacent
 	- If there is a horizontal gap between two boxes, top boxes should collapse down filling the empty spaces
 	- If there is a vertical gap between two columns, boxes will collapse towards the spawn zone
-
-	Bugs:
-	- The timer doesn't reset if we press space to push
 
 */
 
@@ -219,7 +218,9 @@ int main(int argc, char *argv[])
 	float lastFrame = 0;
 	float time;
 	float timestep;
-	float maxPeriod = 1000 / 60;
+	float maxPeriod = 1000 / MAX_FRAMERATE;
+
+	int timeInGame = 0;
 
 	StartGame();
 
@@ -229,13 +230,11 @@ int main(int argc, char *argv[])
 
 		timestep = time - lastFrame;
 
-		// See if it is time to push the blocks
-		// See if the time that has passed can be divided by 8000ms = 8s
-		if (SDL_GetTicks() % 8000 == 0 && !bMainMenu && !bGameOver)
-			bIsTimeToPush = true;
-
 		if (timestep >= maxPeriod)
 		{
+			if(!bGameOver && !bMainMenu)
+				timeInGame++;
+
 			lastFrame = time;
 
 			SDL_Event event;
@@ -247,7 +246,10 @@ int main(int argc, char *argv[])
 					if (event.button.button == SDL_BUTTON_LEFT)
 					{
 						if (pushButton.IsMouseOver() && !bGameOver && !bMainMenu)
+						{
 							PushOres();
+							timeInGame = 0;
+						}
 
 						if (mainMenuText.IsMouseOver() && bMainMenu)
 							bMainMenu = false;
@@ -299,9 +301,13 @@ int main(int argc, char *argv[])
 			renderer.Draw(cloud);
 			cloud.position.x = WIDTH - cloud.size.x;
 
-			//Push ores if its time for it
-			if (bIsTimeToPush)
+			// See if it is time to push the blocks
+			// See if the time that has passed is equal to MAX_FRAMERATE(1s) times the amount of seconds to wait to push
+			if (timeInGame == (MAX_FRAMERATE * 8) && !bMainMenu && !bGameOver)
+			{
 				PushOres();
+				timeInGame = 0;
+			}
 
 			//Spawn
 			int numRenderables = 1;
