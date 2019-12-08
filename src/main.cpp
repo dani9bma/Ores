@@ -53,18 +53,23 @@ void StartGame()
 			{
 			case 1:
 				toRender.assetPath = "assets/green_ore.bmp";
+				toRender.color = "green";
 				break;
 			case 2:
 				toRender.assetPath = "assets/red_ore.bmp";
+				toRender.color = "red";
 				break;
 			case 3:
 				toRender.assetPath = "assets/yellow_ore.bmp";
+				toRender.color = "yellow";
 				break;
 			case 4:
 				toRender.assetPath = "assets/blue_ore.bmp";
+				toRender.color = "blue";
 				break;
 			case 5:
 				toRender.assetPath = "assets/grey_ore.bmp";
+				toRender.color = "grey";
 				break;
 			}
 
@@ -87,18 +92,23 @@ void PushOres()
 		{
 		case 1:
 			toRender.assetPath = "assets/green_ore.bmp";
+			toRender.color = "green";
 			break;
 		case 2:
 			toRender.assetPath = "assets/red_ore.bmp";
+			toRender.color = "red";
 			break;
 		case 3:
 			toRender.assetPath = "assets/yellow_ore.bmp";
+			toRender.color = "yellow";
 			break;
 		case 4:
 			toRender.assetPath = "assets/blue_ore.bmp";
+			toRender.color = "blue";
 			break;
 		case 5:
 			toRender.assetPath = "assets/grey_ore.bmp";
+			toRender.color = "grey";
 			break;
 		}
 
@@ -245,6 +255,15 @@ int main(int argc, char *argv[])
 				{
 					if (event.button.button == SDL_BUTTON_LEFT)
 					{
+						if (!bGameOver && !bMainMenu)
+						{
+							for (int i = 0; i < renderables.size(); i++)
+							{
+								if (renderables[i].IsMouseOver())
+									printf("Click on a %s ore\n", renderables[i].color);
+							}
+						}
+
 						if (pushButton.IsMouseOver() && !bGameOver && !bMainMenu)
 						{
 							PushOres();

@@ -17,6 +17,7 @@ struct Renderable
 	v2 size;
 
 	const char* assetPath;
+	const char* color;
 
 	SDL_Texture* texture;
 	SDL_Texture* overTexture;
