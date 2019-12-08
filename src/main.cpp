@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-#include "timer.h"
 #include "renderer.h"
 
 #include "sound.h"
@@ -8,9 +7,14 @@
 #include <vector>
 
 #define FLOOR_HEIGHT HEIGHT - 192
+#define FLOOR_WIDTH WIDTH - 336
+
 #define SPAWN_POINT WIDTH - (SHAPE_SIZE * 8)
+
 #define TEXT_COLOR { 155, 135, 12 }
 #define TEXT_COLOR_OVER { 105, 85, 0 }
+
+#define SPRITE_PER_COLUMN 8
 
 //Global Variables
 Renderer renderer;
@@ -22,15 +26,16 @@ bool bIsRunning = true;
 bool bMainMenu = true;
 bool bGameOver = false;
 bool bIsSoundOn = true;
+bool bIsTimeToPush = false;
 
 /* TODO:
 
-	- Periodically, a new column of (random) boxes pushes all the columns sideways
 	- When a box is clicked, all adjacently connected boxes of the same color disappear
 		- Boxes are considered adjacent if they are vertically or horizontally next to each other
 		- All adjacent boxes should disappear, not only the immediately adjacent
 	- If there is a horizontal gap between two boxes, top boxes should collapse down filling the empty spaces
 	- If there is a vertical gap between two columns, boxes will collapse towards the spawn zone
+
 */
 
 void StartGame()
@@ -40,7 +45,7 @@ void StartGame()
 	Renderable toRender;
 	for (int i = 1; i <= 7; i++)
 	{
-		for (int j = 1; j <= 8; j++)
+		for (int j = 1; j <= SPRITE_PER_COLUMN; j++)
 		{
 			switch (rand() % 5 + 1)
 			{
@@ -73,9 +78,8 @@ void StartGame()
 
 void PushOres()
 {
-	//Spawn new collumn of ores
 	Renderable toRender;
-	for (int j = 1; j <= 8; j++)
+	for (int j = 1; j <= SPRITE_PER_COLUMN; j++)
 	{
 		switch (rand() % 5 + 1)
 		{
@@ -96,17 +100,19 @@ void PushOres()
 			break;
 		}
 
-		toRender.position.x = (SPAWN_POINT + (SHAPE_SIZE * (renderables.size() / numColumns)));
-		toRender.position.y = (FLOOR_HEIGHT)-(SHAPE_SIZE * j);
+		toRender.position.x = WIDTH;
+		toRender.position.y = FLOOR_HEIGHT-(SHAPE_SIZE * j);
 		toRender.size = { SHAPE_SIZE, SHAPE_SIZE };
 		renderer.CreateRenderable(toRender);
 		renderables.push_back(toRender);
 	}
 
+	numColumns++;
+
 	for (int i = 0; i < renderables.size(); i++)
 		renderables[i].position.x -= SHAPE_SIZE;
 
-	numColumns++;
+	bIsTimeToPush = false;
 }
 
 int main(int argc, char *argv[])
@@ -186,105 +192,129 @@ int main(int argc, char *argv[])
 
 	background.Play(true);
 
+	//Timer
+	float lastFrame = 0;
+	float time;
+	float timestep;
+	float maxPeriod = 1000 / 60;
 
 	StartGame();
 
 	while (bIsRunning) {
-		g_Timer.Start();
 
-		SDL_Event event;
-		if (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT)
-				bIsRunning = false;
-			if (event.type == SDL_KEYDOWN)
-			{
-				if (event.key.keysym.sym == SDLK_SPACE)
-				{
-					PushOres();
-				}
-			}
-			if (event.type == SDL_MOUSEBUTTONDOWN)
-			{
-				if (event.button.button == SDL_BUTTON_LEFT)
-				{
-					if (mainMenuText.IsMouseOver() && bMainMenu)
-						bMainMenu = false;
+		time = (float)SDL_GetTicks();
 
-					if (restartButton.IsMouseOver() && !bMainMenu)
-						StartGame();
+		timestep = time - lastFrame;
 
-					if (playAgainText.IsMouseOver() && bGameOver)
-					{
-						StartGame();
-						bGameOver = false;
-					}
+		// See if it is time to push the blocks
+		// See if the time that has passed can be divided by 8000ms = 8s
+		if (SDL_GetTicks() % 8000 == 0)
+			bIsTimeToPush = true;
 
-					if (soundButton.IsMouseOver())
-					{
-						if (bIsSoundOn)
-						{
-							soundButton.assetPath = "assets/buttonSoundOff.bmp";
-							renderer.CreateRenderable(soundButton);
-							background.Pause();
-							bIsSoundOn = false;
-						}
-						else
-						{
-							soundButton.assetPath = "assets/buttonSoundOn.bmp";
-							renderer.CreateRenderable(soundButton);
-							background.Play(true);
-							bIsSoundOn = true;
-						}
-					}
-				}
-			}
-
-		}
-
-		renderer.Clear();
-
-		//Render
-		renderer.Draw(backgroundImage);
-	
-		renderer.Draw(cloud);
-		cloud.position.x -= cloud.size.x - 250;
-		renderer.Draw(cloud);
-		cloud.position.x -= cloud.size.x - 50;
-		renderer.Draw(cloud);
-		cloud.position.x = WIDTH - cloud.size.x;
-
-		//Spawn
-		int numRenderables = 1;
-		for (int i = 0; i < renderables.size(); i++)
+		if (timestep >= maxPeriod)
 		{
-			if (renderables[i].position.y < FLOOR_HEIGHT - (renderables[i].size.y * (numRenderables)))
-				renderables[i].position.y += 2;
-			renderer.Draw(renderables[i]);
+			lastFrame = time;
 
-			if(numRenderables == 8)
-				numRenderables = 1;
+			SDL_Event event;
+			if (SDL_PollEvent(&event)) {
+				if (event.type == SDL_QUIT)
+					bIsRunning = false;
+				if (event.type == SDL_KEYDOWN)
+				{
+					if (event.key.keysym.sym == SDLK_SPACE)
+					{
+						PushOres();
+					}
+				}
+				if (event.type == SDL_MOUSEBUTTONDOWN)
+				{
+					if (event.button.button == SDL_BUTTON_LEFT)
+					{
+						if (mainMenuText.IsMouseOver() && bMainMenu)
+							bMainMenu = false;
+
+						if (restartButton.IsMouseOver() && !bMainMenu)
+							StartGame();
+
+						if (playAgainText.IsMouseOver() && bGameOver)
+						{
+							StartGame();
+							bGameOver = false;
+						}
+
+						if (soundButton.IsMouseOver())
+						{
+							if (bIsSoundOn)
+							{
+								soundButton.assetPath = "assets/buttonSoundOff.bmp";
+								renderer.CreateRenderable(soundButton);
+								background.Pause();
+								bIsSoundOn = false;
+							}
+							else
+							{
+								soundButton.assetPath = "assets/buttonSoundOn.bmp";
+								renderer.CreateRenderable(soundButton);
+								background.Play(true);
+								bIsSoundOn = true;
+							}
+						}
+					}
+				}
+
+			}
+
+			renderer.Clear();
+
+			//Render
+			renderer.Draw(backgroundImage);
+
+			renderer.Draw(cloud);
+			cloud.position.x -= cloud.size.x - 250;
+			renderer.Draw(cloud);
+			cloud.position.x -= cloud.size.x - 50;
+			renderer.Draw(cloud);
+			cloud.position.x = WIDTH - cloud.size.x;
+
+			//Push ores if its time for it
+			if (bIsTimeToPush)
+				PushOres();
+
+			//Spawn
+			int numRenderables = 1;
+			for (int i = 0; i < renderables.size(); i++)
+			{
+				//This makes the animation of the ores falling from the sky
+				if (renderables[i].position.y < FLOOR_HEIGHT - (renderables[i].size.y * (numRenderables)))
+					renderables[i].position.y += 2;
+
+				renderer.Draw(renderables[i]);
+
+				if (numRenderables == SPRITE_PER_COLUMN)
+					numRenderables = 1;
+				else
+					numRenderables++;
+			}
+
+			//UI
+			renderer.Draw(soundButton);
+
+			if (bMainMenu)
+				renderer.Draw(mainMenuText);
 			else
-				numRenderables++;
+				renderer.Draw(restartButton);
+
+			if (bGameOver)
+			{
+				renderer.Draw(gameOverText);
+
+				renderer.Draw(playAgainText);
+			}
+
+			renderer.Update();
+
+			//printf("FPS: %.1f\n", 1000 / timestep);
 		}
-		
-		//UI
-		renderer.Draw(soundButton);
-
-		if (bMainMenu)
-			renderer.Draw(mainMenuText);
-		else
-			renderer.Draw(restartButton);
-
-		if (bGameOver)
-		{
-			renderer.Draw(gameOverText);
-			
-			renderer.Draw(playAgainText);
-		}
-
-		renderer.Update();
-
-		g_Timer.End();
 	}
 
 	//Clean up
