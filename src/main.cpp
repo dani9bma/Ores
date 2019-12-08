@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
 
 			// See if it is time to push the blocks
 			// See if the time that has passed is equal to MAX_FRAMERATE(1s) times the amount of seconds to wait to push
-			if (timeInGame == (MAX_FRAMERATE * 8) && !bMainMenu && !bGameOver)
+			if (timeInGame == (MAX_FRAMERATE * 2) && !bMainMenu && !bGameOver)
 			{
 				PushOres();
 				timeInGame = 0;
@@ -331,10 +331,9 @@ int main(int argc, char *argv[])
 			renderer.Draw(soundButton);
 
 			if (bMainMenu)
-			{
 				renderer.Draw(mainMenuText);
-			}
-			else
+
+			if (!bMainMenu && !bGameOver)
 			{
 				renderer.Draw(restartButton);
 				renderer.Draw(pushButton);
