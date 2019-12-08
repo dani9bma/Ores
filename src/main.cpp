@@ -16,6 +16,8 @@
 Renderer renderer;
 std::vector<Renderable> renderables;
 
+int numColumns = 0;
+
 bool bIsRunning = true;
 bool bMainMenu = true;
 bool bGameOver = false;
@@ -29,20 +31,7 @@ bool bIsSoundOn = true;
 		- All adjacent boxes should disappear, not only the immediately adjacent
 	- If there is a horizontal gap between two boxes, top boxes should collapse down filling the empty spaces
 	- If there is a vertical gap between two columns, boxes will collapse towards the spawn zone
-
 */
-
-bool IsMouseOver(const Renderable& renderable)
-{
-	//Check if mouse
-	int mouseX, mouseY;
-	SDL_GetMouseState(&mouseX, &mouseY);
-
-	return	(mouseX >= renderable.position.x &&
-		mouseX <= renderable.position.x + renderable.size.x &&
-		mouseY >= renderable.position.y &&
-		mouseY <= renderable.position.y + renderable.size.y);
-}
 
 void StartGame()
 {
@@ -78,7 +67,46 @@ void StartGame()
 			renderer.CreateRenderable(toRender);
 			renderables.push_back(toRender);
 		}
+		numColumns++;
 	}
+}
+
+void PushOres()
+{
+	//Spawn new collumn of ores
+	Renderable toRender;
+	for (int j = 1; j <= 8; j++)
+	{
+		switch (rand() % 5 + 1)
+		{
+		case 1:
+			toRender.assetPath = "assets/green_ore.bmp";
+			break;
+		case 2:
+			toRender.assetPath = "assets/red_ore.bmp";
+			break;
+		case 3:
+			toRender.assetPath = "assets/yellow_ore.bmp";
+			break;
+		case 4:
+			toRender.assetPath = "assets/blue_ore.bmp";
+			break;
+		case 5:
+			toRender.assetPath = "assets/grey_ore.bmp";
+			break;
+		}
+
+		toRender.position.x = (SPAWN_POINT + (SHAPE_SIZE * (renderables.size() / numColumns)));
+		toRender.position.y = (FLOOR_HEIGHT)-(SHAPE_SIZE * j);
+		toRender.size = { SHAPE_SIZE, SHAPE_SIZE };
+		renderer.CreateRenderable(toRender);
+		renderables.push_back(toRender);
+	}
+
+	for (int i = 0; i < renderables.size(); i++)
+		renderables[i].position.x -= SHAPE_SIZE;
+
+	numColumns++;
 }
 
 int main(int argc, char *argv[])
@@ -131,7 +159,7 @@ int main(int argc, char *argv[])
 	gameOverText.position.x = (WIDTH / 2) - (gameOverText.size.x / 2);
 	gameOverText.position.y = (HEIGHT / 2) - (gameOverText.size.y / 2);
 
-	renderer.CreateText(gameOverText, TEXT_COLOR, "Game Over", 24);
+	renderer.CreateText(gameOverText, TEXT_COLOR, TEXT_COLOR, "Game Over", 24);
 
 	//Text "Play Game"
 	Renderable mainMenuText;
@@ -141,7 +169,7 @@ int main(int argc, char *argv[])
 	mainMenuText.position.x = (WIDTH / 2) - (mainMenuText.size.x / 2);
 	mainMenuText.position.y = (HEIGHT / 2) - (mainMenuText.size.y / 2);
 
-	renderer.CreateText(mainMenuText, TEXT_COLOR, "Play Game", 24);
+	renderer.CreateText(mainMenuText, TEXT_COLOR, TEXT_COLOR_OVER, "Play Game", 24);
 
 	//Text "Play Again"
 	Renderable playAgainText;
@@ -151,7 +179,7 @@ int main(int argc, char *argv[])
 	playAgainText.position.x = (WIDTH / 2) - (playAgainText.size.x / 2);
 	playAgainText.position.y = ((HEIGHT / 2) - (playAgainText.size.y / 2)) + playAgainText.size.y;
 
-	renderer.CreateText(playAgainText, TEXT_COLOR, "Play Again", 20);
+	renderer.CreateText(playAgainText, TEXT_COLOR, TEXT_COLOR_OVER, "Play Again", 20);
 
 	//Audio
 	Sound background = Sound("assets/background.mp3");
@@ -168,23 +196,30 @@ int main(int argc, char *argv[])
 		if (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT)
 				bIsRunning = false;
+			if (event.type == SDL_KEYDOWN)
+			{
+				if (event.key.keysym.sym == SDLK_SPACE)
+				{
+					PushOres();
+				}
+			}
 			if (event.type == SDL_MOUSEBUTTONDOWN)
 			{
 				if (event.button.button == SDL_BUTTON_LEFT)
 				{
-					if (IsMouseOver(mainMenuText) && bMainMenu)
+					if (mainMenuText.IsMouseOver() && bMainMenu)
 						bMainMenu = false;
 
-					if (IsMouseOver(restartButton) && !bMainMenu)
+					if (restartButton.IsMouseOver() && !bMainMenu)
 						StartGame();
 
-					if (IsMouseOver(playAgainText) && bGameOver)
+					if (playAgainText.IsMouseOver() && bGameOver)
 					{
 						StartGame();
 						bGameOver = false;
 					}
 
-					if (IsMouseOver(soundButton))
+					if (soundButton.IsMouseOver())
 					{
 						if (bIsSoundOn)
 						{
@@ -225,6 +260,7 @@ int main(int argc, char *argv[])
 			if (renderables[i].position.y < FLOOR_HEIGHT - (renderables[i].size.y * (numRenderables)))
 				renderables[i].position.y += 2;
 			renderer.Draw(renderables[i]);
+
 			if(numRenderables == 8)
 				numRenderables = 1;
 			else
@@ -232,11 +268,6 @@ int main(int argc, char *argv[])
 		}
 		
 		//UI
-		if (IsMouseOver(mainMenuText))
-			renderer.CreateText(mainMenuText, TEXT_COLOR_OVER, "Play Game", 24);
-		else
-			renderer.CreateText(mainMenuText, TEXT_COLOR, "Play Game", 24);
-
 		renderer.Draw(soundButton);
 
 		if (bMainMenu)
@@ -248,11 +279,6 @@ int main(int argc, char *argv[])
 		{
 			renderer.Draw(gameOverText);
 			
-			if(IsMouseOver(playAgainText))
-				renderer.CreateText(playAgainText, TEXT_COLOR_OVER, "Play Again", 20);
-			else
-				renderer.CreateText(playAgainText, TEXT_COLOR, "Play Again", 20);
-
 			renderer.Draw(playAgainText);
 		}
 

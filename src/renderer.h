@@ -19,6 +19,19 @@ struct Renderable
 	const char* assetPath;
 
 	SDL_Texture* texture;
+	SDL_Texture* overTexture;
+
+	inline bool IsMouseOver()
+	{
+		//Check if mouse
+		int mouseX, mouseY;
+		SDL_GetMouseState(&mouseX, &mouseY);
+
+		return	(mouseX >= position.x &&
+			mouseX <= position.x + size.x &&
+			mouseY >= position.y &&
+			mouseY <= position.y + size.y);
+	}
 };
 
 class Renderer
@@ -30,7 +43,7 @@ public:
 	void DestroyRenderable(Renderable renderable);
 
 	void CreateRenderable(Renderable& renderable);
-	void CreateText(Renderable& renderable, SDL_Color color, const char* text, int fontSize);
+	void CreateText(Renderable& renderable, SDL_Color color, SDL_Color overColor, const char* text, int fontSize);
 
 	void Clear();
 	void Draw(Renderable renderable);

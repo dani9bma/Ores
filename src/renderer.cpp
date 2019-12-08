@@ -54,14 +54,22 @@ void Renderer::CreateRenderable(Renderable& renderable)
 {
 	SDL_Surface* surface = SDL_LoadBMP(renderable.assetPath);
 	renderable.texture = SDL_CreateTextureFromSurface(m_Renderer, surface);
+	renderable.overTexture = SDL_CreateTextureFromSurface(m_Renderer, surface);
 	SDL_FreeSurface(surface);
 }
 
-void Renderer::CreateText(Renderable& renderable, SDL_Color color, const char* text, int fontSize)
+void Renderer::CreateText(Renderable& renderable, SDL_Color color, SDL_Color overColor, const char* text, int fontSize)
 {
 	TTF_Font* font = TTF_OpenFont(renderable.assetPath, fontSize);
+
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, text, color);
 	renderable.texture = SDL_CreateTextureFromSurface(m_Renderer, surfaceMessage);
+	SDL_FreeSurface(surfaceMessage);
+
+	//Create texture for when the mouse is overing the text
+	surfaceMessage = TTF_RenderText_Solid(font, text, overColor);
+	renderable.overTexture = SDL_CreateTextureFromSurface(m_Renderer, surfaceMessage);
+
 	SDL_FreeSurface(surfaceMessage);
 }
 
@@ -72,14 +80,16 @@ void Renderer::Clear()
 
 void Renderer::Draw(Renderable renderable)
 {
-
 	SDL_Rect rect;
 	rect.x = renderable.position.x; //position
 	rect.y = renderable.position.y; //position
 	rect.w = renderable.size.x; //size
 	rect.h = renderable.size.y; //size
 
-	SDL_RenderCopy(m_Renderer, renderable.texture, NULL, &rect);
+	if(renderable.IsMouseOver())
+		SDL_RenderCopy(m_Renderer, renderable.overTexture, NULL, &rect);
+	else
+		SDL_RenderCopy(m_Renderer, renderable.texture, NULL, &rect);
 }
 
 void Renderer::Update()
