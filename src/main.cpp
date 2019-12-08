@@ -164,6 +164,14 @@ int main(int argc, char *argv[])
 
 	renderer.CreateRenderable(restartButton);
 
+	//Push Button
+	Renderable pushButton;
+	pushButton.size = { SHAPE_SIZE, SHAPE_SIZE };
+	pushButton.position = { WIDTH - (SHAPE_SIZE * 3), HEIGHT - SHAPE_SIZE };
+	pushButton.assetPath = "assets/buttonPush.bmp";
+
+	renderer.CreateRenderable(pushButton);
+
 	//Sound Button
 	Renderable soundButton;
 	soundButton.size = { SHAPE_SIZE, SHAPE_SIZE };
@@ -234,17 +242,13 @@ int main(int argc, char *argv[])
 			if (SDL_PollEvent(&event)) {
 				if (event.type == SDL_QUIT)
 					bIsRunning = false;
-				if (event.type == SDL_KEYDOWN)
-				{
-					if (event.key.keysym.sym == SDLK_SPACE && !bGameOver && !bMainMenu)
-					{
-						PushOres();
-					}
-				}
 				if (event.type == SDL_MOUSEBUTTONDOWN)
 				{
 					if (event.button.button == SDL_BUTTON_LEFT)
 					{
+						if (pushButton.IsMouseOver() && !bGameOver && !bMainMenu)
+							PushOres();
+
 						if (mainMenuText.IsMouseOver() && bMainMenu)
 							bMainMenu = false;
 
@@ -321,9 +325,14 @@ int main(int argc, char *argv[])
 			renderer.Draw(soundButton);
 
 			if (bMainMenu)
+			{
 				renderer.Draw(mainMenuText);
+			}
 			else
+			{
 				renderer.Draw(restartButton);
+				renderer.Draw(pushButton);
+			}
 
 			if (bGameOver)
 			{
