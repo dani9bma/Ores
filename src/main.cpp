@@ -7,9 +7,9 @@
 #include <vector>
 
 #define FLOOR_HEIGHT HEIGHT - 192
-#define FLOOR_WIDTH WIDTH - 336
 
 #define SPAWN_POINT WIDTH - (SHAPE_SIZE * 8)
+#define END_ZONE WIDTH - (SHAPE_SIZE * 15)
 
 #define TEXT_COLOR { 155, 135, 12 }
 #define TEXT_COLOR_OVER { 105, 85, 0 }
@@ -35,6 +35,9 @@ bool bIsTimeToPush = false;
 		- All adjacent boxes should disappear, not only the immediately adjacent
 	- If there is a horizontal gap between two boxes, top boxes should collapse down filling the empty spaces
 	- If there is a vertical gap between two columns, boxes will collapse towards the spawn zone
+
+	Bugs:
+	- The timer doesn't reset if we press space to push
 
 */
 
@@ -113,6 +116,18 @@ void PushOres()
 		renderables[i].position.x -= SHAPE_SIZE;
 
 	bIsTimeToPush = false;
+}
+
+void CheckEndZone()
+{
+	for (int i = 0; i < renderables.size(); i++)
+	{
+		if (renderables[i].position.x < END_ZONE) 
+		{
+			renderables[i].position.y += 3;
+			bGameOver = true;
+		}
+	}
 }
 
 int main(int argc, char *argv[])
@@ -208,7 +223,7 @@ int main(int argc, char *argv[])
 
 		// See if it is time to push the blocks
 		// See if the time that has passed can be divided by 8000ms = 8s
-		if (SDL_GetTicks() % 8000 == 0)
+		if (SDL_GetTicks() % 8000 == 0 && !bMainMenu && !bGameOver)
 			bIsTimeToPush = true;
 
 		if (timestep >= maxPeriod)
@@ -221,7 +236,7 @@ int main(int argc, char *argv[])
 					bIsRunning = false;
 				if (event.type == SDL_KEYDOWN)
 				{
-					if (event.key.keysym.sym == SDLK_SPACE)
+					if (event.key.keysym.sym == SDLK_SPACE && !bGameOver && !bMainMenu)
 					{
 						PushOres();
 					}
@@ -234,7 +249,10 @@ int main(int argc, char *argv[])
 							bMainMenu = false;
 
 						if (restartButton.IsMouseOver() && !bMainMenu)
+						{
 							StartGame();
+							bGameOver = false;
+						}
 
 						if (playAgainText.IsMouseOver() && bGameOver)
 						{
@@ -263,6 +281,7 @@ int main(int argc, char *argv[])
 				}
 
 			}
+
 
 			renderer.Clear();
 
@@ -295,6 +314,8 @@ int main(int argc, char *argv[])
 				else
 					numRenderables++;
 			}
+
+			CheckEndZone();
 
 			//UI
 			renderer.Draw(soundButton);
