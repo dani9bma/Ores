@@ -5,7 +5,7 @@
 
 Renderer::Renderer()
 {
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
+	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
 	{
 		printf("SDL could not be initialized: %s\n", SDL_GetError());
 		exit(1);
