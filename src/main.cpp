@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <ctime>
 
 #define FLOOR_HEIGHT HEIGHT - 192
 
@@ -41,6 +42,9 @@ bool bIsSoundOn = false;
 void StartGame()
 {
 	renderables.clear();
+
+	//rand() results are more random with this
+	srand(time(NULL));
 
 	Renderable toRender;
 	for (int i = 1; i <= 7; i++)
