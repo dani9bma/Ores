@@ -5,6 +5,7 @@
 #include "sound.h"
 
 #include <vector>
+#include <algorithm>
 
 #define FLOOR_HEIGHT HEIGHT - 192
 
@@ -13,8 +14,6 @@
 
 #define TEXT_COLOR { 155, 135, 12 }
 #define TEXT_COLOR_OVER { 105, 85, 0 }
-
-#define SPRITE_PER_COLUMN 8
 
 #define MAX_FRAMERATE 60
 
@@ -25,13 +24,15 @@ std::vector<Renderable> renderables;
 bool bIsRunning = true;
 bool bMainMenu = true;
 bool bGameOver = false;
-bool bIsSoundOn = true;
+bool bIsSoundOn = false;
 
 /* TODO:
 
 	- When a box is clicked, all adjacently connected boxes of the same color disappear
 		- Boxes are considered adjacent if they are vertically or horizontally next to each other
 		- All adjacent boxes should disappear, not only the immediately adjacent
+
+
 	- If there is a horizontal gap between two boxes, top boxes should collapse down filling the empty spaces
 	- If there is a vertical gap between two columns, boxes will collapse towards the spawn zone
 
@@ -44,7 +45,7 @@ void StartGame()
 	Renderable toRender;
 	for (int i = 1; i <= 7; i++)
 	{
-		for (int j = 1; j <= SPRITE_PER_COLUMN; j++)
+		for (int j = 1; j <= 8; j++)
 		{
 			switch (rand() % 5 + 1)
 			{
@@ -82,7 +83,7 @@ void StartGame()
 void PushOres()
 {
 	Renderable toRender;
-	for (int j = 1; j <= SPRITE_PER_COLUMN; j++)
+	for (int j = 1; j <= 8; j++)
 	{
 		switch (rand() % 5 + 1)
 		{
@@ -129,6 +130,42 @@ void CheckEndZone()
 			bGameOver = true;
 		}
 	}
+}
+
+void CheckForAdjacent(int renderableNum, Renderable renderable)
+{
+	Renderable r = renderable;
+	std::vector<Renderable> renderableToDestroy;
+	bool end = false;
+
+	while (!end)
+	{
+		r.position.x += SHAPE_SIZE;
+		auto it = std::find(renderables.begin(), renderables.end(), r);
+		if (it == renderables.end())
+		{
+			end = true;
+		}
+		else
+		{
+			if (it->color == renderable.color)
+			{
+				renderableToDestroy.push_back(renderable);
+				renderableToDestroy.push_back(*it);
+			}
+			else
+			{
+				end = true;
+			}
+			renderable = *it;
+		}
+
+	}
+
+	for (int i = 0; i < renderableToDestroy.size(); i++)
+		renderables.erase(std::remove(renderables.begin(), renderables.end(), renderableToDestroy[i]), renderables.end());
+
+	//Check to see if is there any vertical box of the same color
 }
 
 int main(int argc, char *argv[])
@@ -211,7 +248,8 @@ int main(int argc, char *argv[])
 	//Audio
 	Sound background = Sound("assets/background.mp3");
 
-	background.Play(true);
+	if(bIsSoundOn)
+		background.Play(true);
 
 	//Timer
 	float lastFrame = 0;
@@ -246,8 +284,11 @@ int main(int argc, char *argv[])
 						{
 							for (int i = 0; i < renderables.size(); i++)
 							{
-								if (renderables[i].IsMouseOver())
+								if (renderables[i].IsMouseOver()) 
+								{
+									CheckForAdjacent(i, renderables[i]);
 									printf("Click on a %s ore\n", renderables[i].color);
+								}
 							}
 						}
 
@@ -316,19 +357,19 @@ int main(int argc, char *argv[])
 			}
 
 			//Spawn
-			int numRenderables = 1;
+			int numRenderables = 0;
 			for (int i = 0; i < renderables.size(); i++)
 			{
+				if (i > 0 && renderables[i].position.x != renderables[i - 1].position.x)
+					numRenderables = 1;
+				else
+					numRenderables++;
+
 				//This makes the animation of the ores falling from the sky
 				if (renderables[i].position.y < FLOOR_HEIGHT - (renderables[i].size.y * (numRenderables)))
 					renderables[i].position.y += 4;
 
 				renderer.Draw(renderables[i]);
-
-				if (numRenderables == SPRITE_PER_COLUMN)
-					numRenderables = 1;
-				else
-					numRenderables++;
 			}
 
 			CheckEndZone();

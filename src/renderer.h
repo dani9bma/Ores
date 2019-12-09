@@ -34,7 +34,14 @@ struct Renderable
 			mouseY >= position.y &&
 			mouseY <= position.y + size.y);
 	}
+
+	bool bIsEndColumn = false;
 };
+
+inline bool operator== (const Renderable& n1, const Renderable& n2)
+{
+	return (n1.position.x == n2.position.x) && (n1.position.y == n2.position.y);
+}
 
 class Renderer
 {
