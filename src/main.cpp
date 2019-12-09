@@ -22,13 +22,10 @@
 Renderer renderer;
 std::vector<Renderable> renderables;
 
-int numColumns = 0;
-
 bool bIsRunning = true;
 bool bMainMenu = true;
 bool bGameOver = false;
 bool bIsSoundOn = true;
-bool bIsTimeToPush = false;
 
 /* TODO:
 
@@ -79,7 +76,6 @@ void StartGame()
 			renderer.CreateRenderable(toRender);
 			renderables.push_back(toRender);
 		}
-		numColumns++;
 	}
 }
 
@@ -119,12 +115,8 @@ void PushOres()
 		renderables.push_back(toRender);
 	}
 
-	numColumns++;
-
 	for (int i = 0; i < renderables.size(); i++)
 		renderables[i].position.x -= SHAPE_SIZE;
-
-	bIsTimeToPush = false;
 }
 
 void CheckEndZone()
@@ -133,7 +125,7 @@ void CheckEndZone()
 	{
 		if (renderables[i].position.x < END_ZONE) 
 		{
-			renderables[i].position.y += 3;
+			renderables[i].position.y += 7;
 			bGameOver = true;
 		}
 	}
@@ -192,8 +184,7 @@ int main(int argc, char *argv[])
 	//Text "Game Over"
 	Renderable gameOverText;
 	gameOverText.assetPath = "assets/JFRocSol.ttf";
-	gameOverText.size.x = 300;
-	gameOverText.size.y = 90;
+	gameOverText.size = { 300, 90 };
 	gameOverText.position.x = (WIDTH / 2) - (gameOverText.size.x / 2);
 	gameOverText.position.y = (HEIGHT / 2) - (gameOverText.size.y / 2);
 
@@ -202,8 +193,7 @@ int main(int argc, char *argv[])
 	//Text "Play Game"
 	Renderable mainMenuText;
 	mainMenuText.assetPath = "assets/JFRocSol.ttf";
-	mainMenuText.size.x = 300;
-	mainMenuText.size.y = 90;
+	mainMenuText.size = { 300, 90 };
 	mainMenuText.position.x = (WIDTH / 2) - (mainMenuText.size.x / 2);
 	mainMenuText.position.y = (HEIGHT / 2) - (mainMenuText.size.y / 2);
 
@@ -212,8 +202,7 @@ int main(int argc, char *argv[])
 	//Text "Play Again"
 	Renderable playAgainText;
 	playAgainText.assetPath = "assets/JFRocSol.ttf";
-	playAgainText.size.x = 200;
-	playAgainText.size.y = 70;
+	playAgainText.size = { 200, 70 };
 	playAgainText.position.x = (WIDTH / 2) - (playAgainText.size.x / 2);
 	playAgainText.position.y = ((HEIGHT / 2) - (playAgainText.size.y / 2)) + playAgainText.size.y;
 
@@ -229,7 +218,6 @@ int main(int argc, char *argv[])
 	float time;
 	float timestep;
 	float maxPeriod = 1000 / MAX_FRAMERATE;
-
 	int timeInGame = 0;
 
 	StartGame();
@@ -237,7 +225,6 @@ int main(int argc, char *argv[])
 	while (bIsRunning) {
 
 		time = (float)SDL_GetTicks();
-
 		timestep = time - lastFrame;
 
 		if (timestep >= maxPeriod)
@@ -322,7 +309,7 @@ int main(int argc, char *argv[])
 
 			// See if it is time to push the blocks
 			// See if the time that has passed is equal to MAX_FRAMERATE(1s) times the amount of seconds to wait to push
-			if (timeInGame == (MAX_FRAMERATE * 2) && !bMainMenu && !bGameOver)
+			if (timeInGame == (MAX_FRAMERATE * 8) && !bMainMenu && !bGameOver)
 			{
 				PushOres();
 				timeInGame = 0;
@@ -334,7 +321,7 @@ int main(int argc, char *argv[])
 			{
 				//This makes the animation of the ores falling from the sky
 				if (renderables[i].position.y < FLOOR_HEIGHT - (renderables[i].size.y * (numRenderables)))
-					renderables[i].position.y += 2;
+					renderables[i].position.y += 4;
 
 				renderer.Draw(renderables[i]);
 
@@ -366,8 +353,6 @@ int main(int argc, char *argv[])
 			}
 
 			renderer.Update();
-
-			//printf("FPS: %.1f\n", 1000 / timestep);
 		}
 	}
 
@@ -382,7 +367,6 @@ int main(int argc, char *argv[])
 	renderer.DestroyRenderable(playAgainText);
 	
 	background.Destroy();
-
 	Mix_CloseAudio();
 
 

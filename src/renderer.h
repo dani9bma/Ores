@@ -20,6 +20,7 @@ struct Renderable
 	const char* color;
 
 	SDL_Texture* texture;
+	//Texture used when mouse is over the renderable
 	SDL_Texture* overTexture;
 
 	inline bool IsMouseOver()
