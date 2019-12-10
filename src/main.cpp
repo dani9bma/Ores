@@ -134,7 +134,7 @@ void CheckEndZone()
 void GetAdjacentUp(Renderable renderable);
 void GetAdjacentDown(Renderable renderable);
 
-std::vector<Renderable> renderableToDestroy;
+std::vector<Renderable> renderablesToDestroy;
 
 void GetAdjacentRight(Renderable renderable)
 {
@@ -153,8 +153,8 @@ void GetAdjacentRight(Renderable renderable)
 		{
 			if (it->color == renderable.color)
 			{
-				renderableToDestroy.push_back(renderable);
-				renderableToDestroy.push_back(*it);
+				renderablesToDestroy.push_back(renderable);
+				renderablesToDestroy.push_back(*it);
 				renderable = *it;
 				GetAdjacentUp(renderable);
 				GetAdjacentDown(renderable);
@@ -184,8 +184,8 @@ void GetAdjacentLeft(Renderable renderable)
 		{
 			if (it->color == renderable.color)
 			{
-				renderableToDestroy.push_back(renderable);
-				renderableToDestroy.push_back(*it);
+				renderablesToDestroy.push_back(renderable);
+				renderablesToDestroy.push_back(*it);
 				renderable = *it;
 				GetAdjacentUp(renderable);
 				GetAdjacentDown(renderable);
@@ -214,8 +214,8 @@ void GetAdjacentUp(Renderable renderable)
 		{
 			if (it->color == renderable.color)
 			{
-				renderableToDestroy.push_back(renderable);
-				renderableToDestroy.push_back(*it);
+				renderablesToDestroy.push_back(renderable);
+				renderablesToDestroy.push_back(*it);
 				renderable = *it;
 				GetAdjacentLeft(renderable);
 				GetAdjacentRight(renderable);
@@ -245,8 +245,8 @@ void GetAdjacentDown(Renderable renderable)
 		{
 			if (it->color == renderable.color)
 			{
-				renderableToDestroy.push_back(renderable);
-				renderableToDestroy.push_back(*it);
+				renderablesToDestroy.push_back(renderable);
+				renderablesToDestroy.push_back(*it);
 				renderable = *it;
 				GetAdjacentLeft(renderable);
 				GetAdjacentRight(renderable);
@@ -259,21 +259,81 @@ void GetAdjacentDown(Renderable renderable)
 	}
 }
 
+enum class Direction
+{
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT
+};
+
+void DestroyRenderable(Renderable renderable)
+{
+	auto it = std::find(renderablesToDestroy.begin(), renderablesToDestroy.end(), renderable);
+	if(it == renderablesToDestroy.end())
+		renderablesToDestroy.push_back(renderable);
+}
+
+void GetAdjacent(Renderable renderable, Direction direction)
+{
+	Renderable r = renderable;
+
+	while (true)
+	{
+		switch (direction)
+		{
+		case Direction::UP:
+			r.position.y -= SHAPE_SIZE;
+			break;
+		case Direction::DOWN:
+			r.position.y += SHAPE_SIZE;
+			break;
+		case Direction::LEFT:
+			r.position.x -= SHAPE_SIZE;
+			break;
+		case Direction::RIGHT:
+			r.position.x += SHAPE_SIZE;
+			break;
+		default:
+			break;
+		}
+
+		auto it = std::find(renderables.begin(), renderables.end(), r);
+		if (it == renderables.end())
+		{
+			break;
+		}
+		else
+		{
+			if (it->color == renderable.color)
+			{
+				DestroyRenderable(renderable);
+				DestroyRenderable(*it);
+				renderable = *it;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+}
+
 void CheckForAdjacent(int renderableNum, Renderable renderable)
 {
 	// Clear the lastest destroyed renderables
-	renderableToDestroy.clear();
+	renderablesToDestroy.clear();
 
 	Renderable r = renderable, mainRenderable = renderable;
 	bool end = false;
 
-	GetAdjacentRight(mainRenderable);
-	GetAdjacentLeft(mainRenderable);
-	GetAdjacentUp(mainRenderable);
-	GetAdjacentDown(mainRenderable);
+	GetAdjacent(mainRenderable, Direction::UP);
+	GetAdjacent(mainRenderable, Direction::DOWN);
+	GetAdjacent(mainRenderable, Direction::LEFT);
+	GetAdjacent(mainRenderable, Direction::RIGHT);
 
-	for (int i = 0; i < renderableToDestroy.size(); i++)
-		renderables.erase(std::remove(renderables.begin(), renderables.end(), renderableToDestroy[i]), renderables.end());
+	for (int i = 0; i < renderablesToDestroy.size(); i++)
+		renderables.erase(std::remove(renderables.begin(), renderables.end(), renderablesToDestroy[i]), renderables.end());
 }
 
 int main(int argc, char *argv[])
@@ -474,7 +534,7 @@ int main(int argc, char *argv[])
 
 				//This makes the animation of the ores falling from the sky
 				if (renderables[i].position.y < FLOOR_HEIGHT - (renderables[i].size.y * (numRenderables)))
-					renderables[i].position.y += 4;
+					renderables[i].position.y += 6;
 
 				renderer.Draw(renderables[i]);
 			}
