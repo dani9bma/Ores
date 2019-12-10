@@ -29,13 +29,10 @@ bool bIsSoundOn = false;
 
 /* TODO:
 
-	- When a box is clicked, all adjacently connected boxes of the same color disappear
-		- Boxes are considered adjacent if they are vertically or horizontally next to each other
-		- All adjacent boxes should disappear, not only the immediately adjacent
-
-
-	- If there is a horizontal gap between two boxes, top boxes should collapse down filling the empty spaces
 	- If there is a vertical gap between two columns, boxes will collapse towards the spawn zone
+
+	Bugs:
+	- when you click on a sequence of blocks when, it isnt the main ore it wont go to any other side
 
 */
 
@@ -138,17 +135,18 @@ void CheckEndZone()
 
 void CheckForAdjacent(int renderableNum, Renderable renderable)
 {
-	Renderable r = renderable;
+	Renderable r = renderable, mainRenderable = renderable;
 	std::vector<Renderable> renderableToDestroy;
 	bool end = false;
 
-	while (!end)
+	//Check if is there any block of the same color on the right
+	while (true)
 	{
 		r.position.x += SHAPE_SIZE;
 		auto it = std::find(renderables.begin(), renderables.end(), r);
 		if (it == renderables.end())
 		{
-			end = true;
+			break;
 		}
 		else
 		{
@@ -156,20 +154,92 @@ void CheckForAdjacent(int renderableNum, Renderable renderable)
 			{
 				renderableToDestroy.push_back(renderable);
 				renderableToDestroy.push_back(*it);
+				renderable = *it;
 			}
 			else
 			{
-				end = true;
+				break;
 			}
-			renderable = *it;
 		}
+	}
 
+	//Check if is there any block of the same color on the left
+	r = mainRenderable;
+	while (true)
+	{
+		r.position.x -= SHAPE_SIZE;
+		auto it = std::find(renderables.begin(), renderables.end(), r);
+		if (it == renderables.end())
+		{
+			break;
+		}
+		else
+		{
+			if (it->color == renderable.color)
+			{
+				renderableToDestroy.push_back(renderable);
+				renderableToDestroy.push_back(*it);
+				renderable = *it;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+	//Check if is there any block of the same color on top of him
+	r = mainRenderable;
+	while (true)
+	{
+		r.position.y -= SHAPE_SIZE;
+		auto it = std::find(renderables.begin(), renderables.end(), r);
+		if (it == renderables.end())
+		{
+			break;
+		}
+		else
+		{
+			if (it->color == renderable.color)
+			{
+				renderableToDestroy.push_back(renderable);
+				renderableToDestroy.push_back(*it);
+				renderable = *it;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+	//Check if is there any block of the same color under him
+	r = mainRenderable;
+	while (true)
+	{
+		r.position.y += SHAPE_SIZE;
+		auto it = std::find(renderables.begin(), renderables.end(), r);
+		if (it == renderables.end())
+		{
+			break;
+		}
+		else
+		{
+			if (it->color == renderable.color)
+			{
+				renderableToDestroy.push_back(renderable);
+				renderableToDestroy.push_back(*it);
+				renderable = *it;
+			}
+			else
+			{
+				break;
+			}
+		}
 	}
 
 	for (int i = 0; i < renderableToDestroy.size(); i++)
 		renderables.erase(std::remove(renderables.begin(), renderables.end(), renderableToDestroy[i]), renderables.end());
-
-	//Check to see if is there any vertical box of the same color
 }
 
 int main(int argc, char *argv[])
@@ -291,7 +361,6 @@ int main(int argc, char *argv[])
 								if (renderables[i].IsMouseOver()) 
 								{
 									CheckForAdjacent(i, renderables[i]);
-									printf("Click on a %s ore\n", renderables[i].color);
 								}
 							}
 						}
