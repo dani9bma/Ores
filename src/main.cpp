@@ -31,9 +31,6 @@ bool bIsSoundOn = false;
 
 	- If there is a vertical gap between two columns, boxes will collapse towards the spawn zone
 
-	Bugs:
-	- when you click on a sequence of blocks when, it isnt the main ore it wont go to any other side
-
 */
 
 void StartGame()
@@ -133,13 +130,17 @@ void CheckEndZone()
 	}
 }
 
-void CheckForAdjacent(int renderableNum, Renderable renderable)
-{
-	Renderable r = renderable, mainRenderable = renderable;
-	std::vector<Renderable> renderableToDestroy;
-	bool end = false;
+// Had to put this here to use them on GetAdjacentRight and GetAdjecentLeft
+void GetAdjacentUp(Renderable renderable);
+void GetAdjacentDown(Renderable renderable);
 
-	//Check if is there any block of the same color on the right
+std::vector<Renderable> renderableToDestroy;
+
+void GetAdjacentRight(Renderable renderable)
+{
+	Renderable r = renderable;
+
+	//Check if is there any block of the same color on the Right
 	while (true)
 	{
 		r.position.x += SHAPE_SIZE;
@@ -155,6 +156,8 @@ void CheckForAdjacent(int renderableNum, Renderable renderable)
 				renderableToDestroy.push_back(renderable);
 				renderableToDestroy.push_back(*it);
 				renderable = *it;
+				GetAdjacentUp(renderable);
+				GetAdjacentDown(renderable);
 			}
 			else
 			{
@@ -162,9 +165,13 @@ void CheckForAdjacent(int renderableNum, Renderable renderable)
 			}
 		}
 	}
+}
 
-	//Check if is there any block of the same color on the left
-	r = mainRenderable;
+void GetAdjacentLeft(Renderable renderable)
+{
+	Renderable r = renderable;
+
+	//Check if is there any block of the same color on the Left
 	while (true)
 	{
 		r.position.x -= SHAPE_SIZE;
@@ -180,6 +187,8 @@ void CheckForAdjacent(int renderableNum, Renderable renderable)
 				renderableToDestroy.push_back(renderable);
 				renderableToDestroy.push_back(*it);
 				renderable = *it;
+				GetAdjacentUp(renderable);
+				GetAdjacentDown(renderable);
 			}
 			else
 			{
@@ -187,9 +196,12 @@ void CheckForAdjacent(int renderableNum, Renderable renderable)
 			}
 		}
 	}
+}
+void GetAdjacentUp(Renderable renderable)
+{
+	Renderable r = renderable;
 
-	//Check if is there any block of the same color on top of him
-	r = mainRenderable;
+	//Check if is there any block of the same color on top of the block
 	while (true)
 	{
 		r.position.y -= SHAPE_SIZE;
@@ -205,6 +217,8 @@ void CheckForAdjacent(int renderableNum, Renderable renderable)
 				renderableToDestroy.push_back(renderable);
 				renderableToDestroy.push_back(*it);
 				renderable = *it;
+				GetAdjacentLeft(renderable);
+				GetAdjacentRight(renderable);
 			}
 			else
 			{
@@ -212,9 +226,13 @@ void CheckForAdjacent(int renderableNum, Renderable renderable)
 			}
 		}
 	}
+}
 
-	//Check if is there any block of the same color under him
-	r = mainRenderable;
+void GetAdjacentDown(Renderable renderable)
+{
+	Renderable r = renderable;
+
+	//Check if is there any block of the same color under the block
 	while (true)
 	{
 		r.position.y += SHAPE_SIZE;
@@ -230,6 +248,8 @@ void CheckForAdjacent(int renderableNum, Renderable renderable)
 				renderableToDestroy.push_back(renderable);
 				renderableToDestroy.push_back(*it);
 				renderable = *it;
+				GetAdjacentLeft(renderable);
+				GetAdjacentRight(renderable);
 			}
 			else
 			{
@@ -237,6 +257,20 @@ void CheckForAdjacent(int renderableNum, Renderable renderable)
 			}
 		}
 	}
+}
+
+void CheckForAdjacent(int renderableNum, Renderable renderable)
+{
+	// Clear the lastest destroyed renderables
+	renderableToDestroy.clear();
+
+	Renderable r = renderable, mainRenderable = renderable;
+	bool end = false;
+
+	GetAdjacentRight(mainRenderable);
+	GetAdjacentLeft(mainRenderable);
+	GetAdjacentUp(mainRenderable);
+	GetAdjacentDown(mainRenderable);
 
 	for (int i = 0; i < renderableToDestroy.size(); i++)
 		renderables.erase(std::remove(renderables.begin(), renderables.end(), renderableToDestroy[i]), renderables.end());
