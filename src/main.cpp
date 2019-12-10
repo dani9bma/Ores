@@ -130,39 +130,34 @@ void CheckEndZone()
 	}
 }
 
+
 // Had to put this here to use them on GetAdjacentRight and GetAdjecentLeft
 void GetAdjacentUp(Renderable renderable);
 void GetAdjacentDown(Renderable renderable);
 
 std::vector<Renderable> renderablesToDestroy;
 
+void DestroyRenderable(Renderable renderable)
+{
+	auto it = std::find(renderablesToDestroy.begin(), renderablesToDestroy.end(), renderable);
+	if (it == renderablesToDestroy.end())
+		renderablesToDestroy.push_back(renderable);
+}
+
 void GetAdjacentRight(Renderable renderable)
 {
 	Renderable r = renderable;
 
 	//Check if is there any block of the same color on the Right
-	while (true)
+	r.position.x += SHAPE_SIZE;
+	auto it = std::find(renderables.begin(), renderables.end(), r);
+	if (it != renderables.end())
 	{
-		r.position.x += SHAPE_SIZE;
-		auto it = std::find(renderables.begin(), renderables.end(), r);
-		if (it == renderables.end())
+		if (it->color == renderable.color)
 		{
-			break;
-		}
-		else
-		{
-			if (it->color == renderable.color)
-			{
-				renderablesToDestroy.push_back(renderable);
-				renderablesToDestroy.push_back(*it);
-				renderable = *it;
-				GetAdjacentUp(renderable);
-				GetAdjacentDown(renderable);
-			}
-			else
-			{
-				break;
-			}
+			DestroyRenderable(renderable);
+			DestroyRenderable(*it);
+			renderable = *it;
 		}
 	}
 }
@@ -172,29 +167,17 @@ void GetAdjacentLeft(Renderable renderable)
 	Renderable r = renderable;
 
 	//Check if is there any block of the same color on the Left
-	while (true)
+	r.position.x -= SHAPE_SIZE;
+	auto it = std::find(renderables.begin(), renderables.end(), r);
+	if (it != renderables.end())
 	{
-		r.position.x -= SHAPE_SIZE;
-		auto it = std::find(renderables.begin(), renderables.end(), r);
-		if (it == renderables.end())
+		if (it->color == renderable.color)
 		{
-			break;
+			DestroyRenderable(renderable);
+			DestroyRenderable(*it);
+			renderable = *it;
 		}
-		else
-		{
-			if (it->color == renderable.color)
-			{
-				renderablesToDestroy.push_back(renderable);
-				renderablesToDestroy.push_back(*it);
-				renderable = *it;
-				GetAdjacentUp(renderable);
-				GetAdjacentDown(renderable);
-			}
-			else
-			{
-				break;
-			}
-		}
+
 	}
 }
 void GetAdjacentUp(Renderable renderable)
@@ -202,28 +185,15 @@ void GetAdjacentUp(Renderable renderable)
 	Renderable r = renderable;
 
 	//Check if is there any block of the same color on top of the block
-	while (true)
+	r.position.y -= SHAPE_SIZE;
+	auto it = std::find(renderables.begin(), renderables.end(), r);
+	if (it != renderables.end())
 	{
-		r.position.y -= SHAPE_SIZE;
-		auto it = std::find(renderables.begin(), renderables.end(), r);
-		if (it == renderables.end())
+		if (it->color == renderable.color)
 		{
-			break;
-		}
-		else
-		{
-			if (it->color == renderable.color)
-			{
-				renderablesToDestroy.push_back(renderable);
-				renderablesToDestroy.push_back(*it);
-				renderable = *it;
-				GetAdjacentLeft(renderable);
-				GetAdjacentRight(renderable);
-			}
-			else
-			{
-				break;
-			}
+			DestroyRenderable(renderable);
+			DestroyRenderable(*it);
+			renderable = *it;
 		}
 	}
 }
@@ -233,28 +203,15 @@ void GetAdjacentDown(Renderable renderable)
 	Renderable r = renderable;
 
 	//Check if is there any block of the same color under the block
-	while (true)
+	r.position.y += SHAPE_SIZE;
+	auto it = std::find(renderables.begin(), renderables.end(), r);
+	if (it != renderables.end())
 	{
-		r.position.y += SHAPE_SIZE;
-		auto it = std::find(renderables.begin(), renderables.end(), r);
-		if (it == renderables.end())
+		if (it->color == renderable.color)
 		{
-			break;
-		}
-		else
-		{
-			if (it->color == renderable.color)
-			{
-				renderablesToDestroy.push_back(renderable);
-				renderablesToDestroy.push_back(*it);
-				renderable = *it;
-				GetAdjacentLeft(renderable);
-				GetAdjacentRight(renderable);
-			}
-			else
-			{
-				break;
-			}
+			DestroyRenderable(renderable);
+			DestroyRenderable(*it);
+			renderable = *it;
 		}
 	}
 }
@@ -266,13 +223,6 @@ enum class Direction
 	LEFT,
 	RIGHT
 };
-
-void DestroyRenderable(Renderable renderable)
-{
-	auto it = std::find(renderablesToDestroy.begin(), renderablesToDestroy.end(), renderable);
-	if(it == renderablesToDestroy.end())
-		renderablesToDestroy.push_back(renderable);
-}
 
 void GetAdjacent(Renderable renderable, Direction direction)
 {
@@ -294,8 +244,6 @@ void GetAdjacent(Renderable renderable, Direction direction)
 		case Direction::RIGHT:
 			r.position.x += SHAPE_SIZE;
 			break;
-		default:
-			break;
 		}
 
 		auto it = std::find(renderables.begin(), renderables.end(), r);
@@ -310,6 +258,30 @@ void GetAdjacent(Renderable renderable, Direction direction)
 				DestroyRenderable(renderable);
 				DestroyRenderable(*it);
 				renderable = *it;
+
+				switch (direction)
+				{
+				case Direction::UP:
+					GetAdjacentUp(renderable);
+					GetAdjacentLeft(renderable);
+					GetAdjacentRight(renderable);
+					break;
+				case Direction::DOWN:
+					GetAdjacentDown(renderable);
+					GetAdjacentLeft(renderable);
+					GetAdjacentRight(renderable);
+					break;
+				case Direction::LEFT:
+					GetAdjacentLeft(renderable);
+					GetAdjacentUp(renderable);
+					GetAdjacentDown(renderable);
+					break;
+				case Direction::RIGHT:
+					GetAdjacentRight(renderable);
+					GetAdjacentUp(renderable);
+					GetAdjacentDown(renderable);
+					break;
+				}
 			}
 			else
 			{
