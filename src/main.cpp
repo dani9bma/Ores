@@ -130,92 +130,7 @@ void CheckEndZone()
 	}
 }
 
-
-// Had to put this here to use them on GetAdjacentRight and GetAdjecentLeft
-void GetAdjacentUp(Renderable renderable);
-void GetAdjacentDown(Renderable renderable);
-
 std::vector<Renderable> renderablesToDestroy;
-
-void DestroyRenderable(Renderable renderable)
-{
-	auto it = std::find(renderablesToDestroy.begin(), renderablesToDestroy.end(), renderable);
-	if (it == renderablesToDestroy.end())
-		renderablesToDestroy.push_back(renderable);
-}
-
-void GetAdjacentRight(Renderable renderable)
-{
-	Renderable r = renderable;
-
-	//Check if is there any block of the same color on the Right
-	r.position.x += SHAPE_SIZE;
-	auto it = std::find(renderables.begin(), renderables.end(), r);
-	if (it != renderables.end())
-	{
-		if (it->color == renderable.color)
-		{
-			DestroyRenderable(renderable);
-			DestroyRenderable(*it);
-			renderable = *it;
-		}
-	}
-}
-
-void GetAdjacentLeft(Renderable renderable)
-{
-	Renderable r = renderable;
-
-	//Check if is there any block of the same color on the Left
-	r.position.x -= SHAPE_SIZE;
-	auto it = std::find(renderables.begin(), renderables.end(), r);
-	if (it != renderables.end())
-	{
-		if (it->color == renderable.color)
-		{
-			DestroyRenderable(renderable);
-			DestroyRenderable(*it);
-			renderable = *it;
-		}
-
-	}
-}
-void GetAdjacentUp(Renderable renderable)
-{
-	Renderable r = renderable;
-
-	//Check if is there any block of the same color on top of the block
-	r.position.y -= SHAPE_SIZE;
-	auto it = std::find(renderables.begin(), renderables.end(), r);
-	if (it != renderables.end())
-	{
-		if (it->color == renderable.color)
-		{
-			DestroyRenderable(renderable);
-			DestroyRenderable(*it);
-			renderable = *it;
-		}
-	}
-}
-
-void GetAdjacentDown(Renderable renderable)
-{
-	Renderable r = renderable;
-
-	//Check if is there any block of the same color under the block
-	r.position.y += SHAPE_SIZE;
-	auto it = std::find(renderables.begin(), renderables.end(), r);
-	if (it != renderables.end())
-	{
-		if (it->color == renderable.color)
-		{
-			DestroyRenderable(renderable);
-			DestroyRenderable(*it);
-			renderable = *it;
-		}
-	}
-}
-
 enum class Direction
 {
 	UP,
@@ -223,6 +138,13 @@ enum class Direction
 	LEFT,
 	RIGHT
 };
+
+void DestroyRenderable(Renderable renderable)
+{
+	auto it = std::find(renderablesToDestroy.begin(), renderablesToDestroy.end(), renderable);
+	if (it == renderablesToDestroy.end())
+		renderablesToDestroy.push_back(renderable);
+}
 
 void GetAdjacent(Renderable renderable, Direction direction)
 {
@@ -246,40 +168,46 @@ void GetAdjacent(Renderable renderable, Direction direction)
 			break;
 		}
 
-		auto it = std::find(renderables.begin(), renderables.end(), r);
-		if (it == renderables.end())
+		// Check if the renderable that we want to check is already going to be destroyed
+		// if so it doesnt need to be checked again
+		auto it = std::find(renderablesToDestroy.begin(), renderablesToDestroy.end(), r);
+		if (it == renderablesToDestroy.end())
 		{
-			break;
-		}
-		else
-		{
-			if (it->color == renderable.color)
+			it = std::find(renderables.begin(), renderables.end(), r);
+			if (it != renderables.end())
 			{
-				DestroyRenderable(renderable);
-				DestroyRenderable(*it);
-				renderable = *it;
-
-				switch (direction)
+				if (it->color == renderable.color)
 				{
-				case Direction::UP:
-					GetAdjacentUp(renderable);
-					GetAdjacentLeft(renderable);
-					GetAdjacentRight(renderable);
-					break;
-				case Direction::DOWN:
-					GetAdjacentDown(renderable);
-					GetAdjacentLeft(renderable);
-					GetAdjacentRight(renderable);
-					break;
-				case Direction::LEFT:
-					GetAdjacentLeft(renderable);
-					GetAdjacentUp(renderable);
-					GetAdjacentDown(renderable);
-					break;
-				case Direction::RIGHT:
-					GetAdjacentRight(renderable);
-					GetAdjacentUp(renderable);
-					GetAdjacentDown(renderable);
+					DestroyRenderable(renderable);
+					DestroyRenderable(*it);
+					renderable = *it;
+
+					switch (direction)
+					{
+					case Direction::UP:
+						GetAdjacent(renderable, Direction::UP);
+						GetAdjacent(renderable, Direction::LEFT);
+						GetAdjacent(renderable, Direction::RIGHT);
+						break;
+					case Direction::DOWN:
+						GetAdjacent(renderable, Direction::DOWN);
+						GetAdjacent(renderable, Direction::LEFT);
+						GetAdjacent(renderable, Direction::RIGHT);
+						break;
+					case Direction::LEFT:
+						GetAdjacent(renderable, Direction::LEFT);
+						GetAdjacent(renderable, Direction::DOWN);
+						GetAdjacent(renderable, Direction::UP);
+						break;
+					case Direction::RIGHT:
+						GetAdjacent(renderable, Direction::RIGHT);
+						GetAdjacent(renderable, Direction::UP);
+						GetAdjacent(renderable, Direction::DOWN);
+						break;
+					}
+				}
+				else
+				{
 					break;
 				}
 			}
