@@ -114,17 +114,17 @@ void PushOres()
 		renderables.push_back(toRender);
 	}
 
-	for (int i = 0; i < renderables.size(); i++)
-		renderables[i].position.x -= SHAPE_SIZE;
+	for (Renderable& renderable : renderables)
+		renderable.position.x -= SHAPE_SIZE;
 }
 
 void CheckEndZone()
 {
-	for (int i = 0; i < renderables.size(); i++)
+	for (Renderable& renderable : renderables)
 	{
-		if (renderables[i].position.x < END_ZONE) 
+		if (renderable.position.x < END_ZONE) 
 		{
-			renderables[i].position.y += 7;
+			renderable.position.y += 7;
 			bGameOver = true;
 		}
 	}
@@ -141,6 +141,7 @@ enum class Direction
 
 void DestroyRenderable(Renderable renderable)
 {
+	// Check if the renderable, that is going to be destroyed, is not yet on "renderablesToDestroy"
 	auto it = std::find(renderablesToDestroy.begin(), renderablesToDestroy.end(), renderable);
 	if (it == renderablesToDestroy.end())
 		renderablesToDestroy.push_back(renderable);
@@ -232,8 +233,8 @@ void CheckForAdjacent(int renderableNum, Renderable renderable)
 	GetAdjacent(mainRenderable, Direction::LEFT);
 	GetAdjacent(mainRenderable, Direction::RIGHT);
 
-	for (int i = 0; i < renderablesToDestroy.size(); i++)
-		renderables.erase(std::remove(renderables.begin(), renderables.end(), renderablesToDestroy[i]), renderables.end());
+	for (const auto& i : renderablesToDestroy)
+		renderables.erase(std::remove(renderables.begin(), renderables.end(), i), renderables.end());
 }
 
 int main(int argc, char *argv[])
@@ -468,8 +469,8 @@ int main(int argc, char *argv[])
 	renderer.DestroyRenderable(backgroundImage);
 	renderer.DestroyRenderable(cloud);
 	
-	for (int i = 0; i < renderables.size(); i++)
-		renderer.DestroyRenderable(renderables[i]);
+	for (Renderable& renderable : renderables)
+		renderer.DestroyRenderable(renderable);
 	
 	renderer.DestroyRenderable(mainMenuText);
 	renderer.DestroyRenderable(playAgainText);
