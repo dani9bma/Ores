@@ -30,10 +30,9 @@ bool bIsSoundOn = false;
 
 /* TODO:
 
-	- Make a better Start Menu
-		- Make an image with a grey screen with low alpha and the text on top of it, in game
 	- Make a tutorial like thing to show that the user can click on the push arrow when he doesnt have any more options
 	- Add Sound when clicking on ores and removing them
+	- Add a score system
 
 */
 
@@ -293,6 +292,14 @@ int main(int argc, char *argv[])
 
 	renderer.CreateRenderable(backgroundImage);
 
+	//Start Menu Background
+	Renderable startMenuBackground;
+	startMenuBackground.position = { 0, 0 };
+	startMenuBackground.size = { WIDTH, HEIGHT };
+	startMenuBackground.assetPath = "assets/start_menu_grey.bmp";
+
+	renderer.CreateRenderable(startMenuBackground);
+
 	//Cloud
 	Renderable cloud;
 	cloud.size = { 336, 192};
@@ -497,10 +504,13 @@ int main(int argc, char *argv[])
 			CheckEndZone();
 
 			//UI
-			renderer.Draw(soundButton);
-
 			if (bMainMenu)
+			{
+				renderer.Draw(startMenuBackground);
 				renderer.Draw(mainMenuText);
+			}
+
+			renderer.Draw(soundButton);
 
 			if (!bMainMenu && !bGameOver)
 			{
