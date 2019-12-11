@@ -30,11 +30,11 @@ bool bIsSoundOn = false;
 
 /* TODO:
 
-	- If there is a vertical gap between two columns, boxes will collapse towards the spawn zone
+	- Make a better Start Menu
+		- Make an image with a grey screen with low alpha and the text on top of it, in game
+	- Make a tutorial like thing to show that the user can click on the push arrow when he doesnt have any more options
+	- Add Sound when clicking on ores and removing them
 
-
-	Bug:
-	- Reset timer when restarting game
 */
 
 void StartGame()
@@ -411,6 +411,7 @@ int main(int argc, char *argv[])
 						{
 							StartGame();
 							bGameOver = false;
+							timeInGame = 0;
 						}
 
 						if (playAgainText.IsMouseOver() && bGameOver)
