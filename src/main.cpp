@@ -32,6 +32,9 @@ bool bIsSoundOn = false;
 
 	- If there is a vertical gap between two columns, boxes will collapse towards the spawn zone
 
+
+	Bug:
+	- Reset timer when restarting game
 */
 
 void StartGame()
@@ -133,6 +136,8 @@ void CheckEndZone()
 
 void PushToSpawn()
 {
+	int xPos;
+
 	for (int i = 0; i < renderables.size(); i++)
 	{
 		if (renderables[i].position.y == FLOOR_HEIGHT - SHAPE_SIZE &&
@@ -144,15 +149,19 @@ void PushToSpawn()
 			auto it = std::find(renderables.begin(), renderables.end(), renderable);
 			if (it == renderables.end())
 			{
-				for (int j = 0; j <= i; j++)
-				{
-					renderables[j].position.x += SHAPE_SIZE;
-				}
+				xPos = renderables[i].position.x;
 
-				for (int j = i + 1; j < renderables.size(); j++)
+				for (int j = 0; j < renderables.size(); j++)
 				{
-					if(renderables[j].position.x == renderable.position.x)
+					if (j > i)
+					{
+						if (renderables[j].position.x == xPos)
+							renderables[j].position.x += SHAPE_SIZE;
+					}
+					else
+					{
 						renderables[j].position.x += SHAPE_SIZE;
+					}
 				}
 			}
 		}
