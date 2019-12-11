@@ -8,10 +8,10 @@
 #include <algorithm>
 #include <ctime>
 
-#define FLOOR_HEIGHT HEIGHT - 192
+#define FLOOR_HEIGHT (HEIGHT - 192)
 
-#define SPAWN_POINT WIDTH - (SHAPE_SIZE * 8)
-#define END_ZONE WIDTH - (SHAPE_SIZE * 15)
+#define SPAWN_POINT (WIDTH - (SHAPE_SIZE * 8))
+#define END_ZONE (WIDTH - (SHAPE_SIZE * 15))
 
 #define TEXT_COLOR { 155, 135, 12 }
 #define TEXT_COLOR_OVER { 105, 85, 0 }
@@ -139,7 +139,7 @@ enum class Direction
 	RIGHT
 };
 
-void DestroyRenderable(Renderable renderable)
+void DestroyRenderable(Renderable& renderable)
 {
 	// Check if the renderable, that is going to be destroyed, is not yet on "renderablesToDestroy"
 	auto it = std::find(renderablesToDestroy.begin(), renderablesToDestroy.end(), renderable);
@@ -220,7 +220,7 @@ void GetAdjacent(Renderable renderable, Direction direction)
 	}
 }
 
-void CheckForAdjacent(int renderableNum, Renderable renderable)
+void CheckForAdjacent(int renderableNum, Renderable& renderable)
 {
 	// Clear the lastest destroyed renderables
 	renderablesToDestroy.clear();
@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
 	float lastFrame = 0;
 	float time;
 	float timestep;
-	float maxPeriod = 1000 / MAX_FRAMERATE;
+	float maxPeriod = (float)1000 / MAX_FRAMERATE;
 	int timeInGame = 0;
 
 	StartGame();
@@ -428,16 +428,18 @@ int main(int argc, char *argv[])
 			int numRenderables = 0;
 			for (int i = 0; i < renderables.size(); i++)
 			{
-				if (i > 0 && renderables[i].position.x != renderables[i - 1].position.x)
+				Renderable& renderable = renderables[i];
+
+				if (i > 0 && renderable.position.x != renderables[i - 1].position.x)
 					numRenderables = 1;
 				else
 					numRenderables++;
 
 				//This makes the animation of the ores falling from the sky
-				if (renderables[i].position.y < FLOOR_HEIGHT - (renderables[i].size.y * (numRenderables)))
-					renderables[i].position.y += 6;
+				if (renderable.position.y < FLOOR_HEIGHT - (renderable.size.y * (numRenderables)))
+					renderable.position.y += 6;
 
-				renderer.Draw(renderables[i]);
+				renderer.Draw(renderable);
 			}
 
 			CheckEndZone();
