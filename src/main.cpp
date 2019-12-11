@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <ctime>
+#include <map>
 
 #define FLOOR_HEIGHT (HEIGHT - 192)
 
@@ -130,6 +131,34 @@ void CheckEndZone()
 	}
 }
 
+void PushToSpawn()
+{
+	for (int i = 0; i < renderables.size(); i++)
+	{
+		if (renderables[i].position.y == FLOOR_HEIGHT - SHAPE_SIZE &&
+			renderables[i].position.x < WIDTH - SHAPE_SIZE)
+		{
+			Renderable renderable = renderables[i];
+			renderable.position.x += SHAPE_SIZE;
+
+			auto it = std::find(renderables.begin(), renderables.end(), renderable);
+			if (it == renderables.end())
+			{
+				for (int j = 0; j <= i; j++)
+				{
+					renderables[j].position.x += SHAPE_SIZE;
+				}
+
+				for (int j = i + 1; j < renderables.size(); j++)
+				{
+					if(renderables[j].position.x == renderable.position.x)
+						renderables[j].position.x += SHAPE_SIZE;
+				}
+			}
+		}
+	}
+}
+
 std::vector<Renderable> renderablesToDestroy;
 enum class Direction
 {
@@ -220,12 +249,12 @@ void GetAdjacent(Renderable renderable, Direction direction)
 	}
 }
 
-void CheckForAdjacent(int renderableNum, Renderable& renderable)
+void CheckForAdjacent(int renderableNum, Renderable& renderableToCheck)
 {
 	// Clear the lastest destroyed renderables
 	renderablesToDestroy.clear();
 
-	Renderable r = renderable, mainRenderable = renderable;
+	Renderable r = renderableToCheck, mainRenderable = renderableToCheck;
 	bool end = false;
 
 	GetAdjacent(mainRenderable, Direction::UP);
@@ -233,7 +262,7 @@ void CheckForAdjacent(int renderableNum, Renderable& renderable)
 	GetAdjacent(mainRenderable, Direction::LEFT);
 	GetAdjacent(mainRenderable, Direction::RIGHT);
 
-	for (const auto& i : renderablesToDestroy)
+	for (const Renderable& i : renderablesToDestroy)
 		renderables.erase(std::remove(renderables.begin(), renderables.end(), i), renderables.end());
 }
 
@@ -426,21 +455,34 @@ int main(int argc, char *argv[])
 
 			//Spawn
 			int numRenderables = 0;
+			bool bIsEveryRenderableOnGround = true;
 			for (int i = 0; i < renderables.size(); i++)
 			{
 				Renderable& renderable = renderables[i];
 
+				//Get the end of the column
 				if (i > 0 && renderable.position.x != renderables[i - 1].position.x)
+				{
 					numRenderables = 1;
+					renderables[i - 1].bIsEndColumn = true;
+				}
 				else
+				{
 					numRenderables++;
+				}
 
-				//This makes the animation of the ores falling from the sky
+				//This makes the ores fall from the sky
 				if (renderable.position.y < FLOOR_HEIGHT - (renderable.size.y * (numRenderables)))
+				{
 					renderable.position.y += 6;
+					bIsEveryRenderableOnGround = false;
+				}
 
 				renderer.Draw(renderable);
 			}
+
+			if(bIsEveryRenderableOnGround)
+				PushToSpawn();
 
 			CheckEndZone();
 
