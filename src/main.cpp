@@ -7,7 +7,6 @@
 #include <vector>
 #include <algorithm>
 #include <ctime>
-#include <map>
 
 #define FLOOR_HEIGHT (HEIGHT - 192)
 
@@ -546,6 +545,10 @@ int main(int argc, char *argv[])
 			}
 
 			renderer.Update();
+
+#if _DEBUG
+			printf("FPS: %.0f\n", 1000.0f / timestep);
+#endif
 		}
 	}
 
