@@ -33,6 +33,7 @@ bool bIsSoundOn = false;
 	- Make a tutorial like thing to show that the user can click on the push arrow when he doesnt have any more options
 	- Add Sound when clicking on ores and removing them
 	- Add a score system
+	- Add a new game over screen showing the score
 
 */
 
@@ -73,6 +74,7 @@ void StartGame()
 			}
 
 			toRender.position.x = (SPAWN_POINT + (SHAPE_SIZE * i));
+			// Put the y 2 renderables above so that we can make the animation of them falling
 			toRender.position.y = ((FLOOR_HEIGHT)-(SHAPE_SIZE * j)) - SHAPE_SIZE * 2;
 			toRender.size = { SHAPE_SIZE, SHAPE_SIZE };
 			renderer.CreateRenderable(toRender);
@@ -139,12 +141,20 @@ void PushToSpawn()
 
 	for (int i = 0; i < renderables.size(); i++)
 	{
+		// Check if the current renderable is the closest to the ground
+		// so that we can see if the next column is empty or not.
+		// Check if it isn't in the last column, because the column next to the last
+		// is, of course, blank
 		if (renderables[i].position.y == FLOOR_HEIGHT - SHAPE_SIZE &&
 			renderables[i].position.x < WIDTH - SHAPE_SIZE)
 		{
+			// Get the renderable that is closest to the ground, in the next column
 			Renderable renderable = renderables[i];
 			renderable.position.x += SHAPE_SIZE;
 
+			// See if the renderable doesn't exist, because if it doesn´t exist
+			// it means that the whole column is blank and we can push, all the
+			// previous renderables, to the spawn
 			auto it = std::find(renderables.begin(), renderables.end(), renderable);
 			if (it == renderables.end())
 			{
@@ -152,6 +162,9 @@ void PushToSpawn()
 
 				for (int j = 0; j < renderables.size(); j++)
 				{
+					// The renderable that is closest to the ground is the first index
+					// of the column so we need to see if the next indexes are of the same
+					// column, because if they are they need to be pushed too
 					if (j > i)
 					{
 						if (renderables[j].position.x == xPos)
@@ -471,35 +484,42 @@ int main(int argc, char *argv[])
 			}
 
 			//Spawn
-			int numRenderables = 0;
-			bool bIsEveryRenderableOnGround = true;
-			for (int i = 0; i < renderables.size(); i++)
+			if (!bMainMenu)
 			{
-				Renderable& renderable = renderables[i];
-
-				//Get the end of the column
-				if (i > 0 && renderable.position.x != renderables[i - 1].position.x)
+				int numRenderables = 0;
+				bool bIsEveryRenderableOnGround = true;
+				for (int i = 0; i < renderables.size(); i++)
 				{
-					numRenderables = 1;
-					renderables[i - 1].bIsEndColumn = true;
-				}
-				else
-				{
-					numRenderables++;
+					Renderable& renderable = renderables[i];
+
+					//Get the end of the column
+					if (i > 0 && renderable.position.x != renderables[i - 1].position.x)
+					{
+						numRenderables = 1;
+						renderables[i - 1].bIsEndColumn = true;
+					}
+					else
+					{
+						numRenderables++;
+					}
+
+					//This makes the ores fall from the sky
+					if (renderable.position.y < FLOOR_HEIGHT - (renderable.size.y * (numRenderables)))
+					{
+						renderable.position.y += 6;
+						bIsEveryRenderableOnGround = false;
+					}
+
+					renderer.Draw(renderable);
 				}
 
-				//This makes the ores fall from the sky
-				if (renderable.position.y < FLOOR_HEIGHT - (renderable.size.y * (numRenderables)))
-				{
-					renderable.position.y += 6;
-					bIsEveryRenderableOnGround = false;
-				}
-
-				renderer.Draw(renderable);
+				// Check if every renderable has already fallen because if not
+				// it will check if the next block is clear with the position
+				// of them falling, and will get the wrong results
+				if (bIsEveryRenderableOnGround)
+					PushToSpawn();
 			}
-
-			if(bIsEveryRenderableOnGround)
-				PushToSpawn();
+			
 
 			CheckEndZone();
 
