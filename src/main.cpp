@@ -36,15 +36,17 @@ Renderable scoreText;
 
 void StartGame()
 {
+	// Reset score
 	score = 0;
 
+	// Update Score string
 	std::string scoreStr = "Score : ";
 	scoreStr.append(std::to_string(score));
 	renderer.CreateText(scoreText, TEXT_COLOR, TEXT_COLOR, scoreStr.c_str(), 20);
 
 	renderables.clear();
 
-	//rand() results are more random with this
+	// rand() results are more random with this
 	srand(time(NULL));
 
 	Renderable toRender;
@@ -153,6 +155,7 @@ void CheckEndZone()
 			renderable.position.y += 7;
 			bGameOver = true;
 
+			// Create the game over score string
 			std::string scoreStrGO = "Your score was : ";
 			scoreStrGO.append(std::to_string(score));
 			renderer.CreateText(scoreTextGO, TEXT_COLOR, TEXT_COLOR, scoreStrGO.c_str(), 20);
@@ -396,6 +399,7 @@ void CheckForAdjacent(int renderableNum, Renderable renderableToCheck)
 		score += 20;
 	}
 
+	// Update score
 	std::string scoreStr = "Score : ";
 	scoreStr.append(std::to_string(score));
 	renderer.CreateText(scoreText, TEXT_COLOR, TEXT_COLOR, scoreStr.c_str(), 20);
