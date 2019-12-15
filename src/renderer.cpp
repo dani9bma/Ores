@@ -6,35 +6,23 @@
 Renderer::Renderer()
 {
 	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
-	{
 		printf("SDL could not be initialized: %s\n", SDL_GetError());
-		exit(1);
-	}
 
 
 	if (TTF_Init() < 0)
-	{
 		printf("SDL_TTF could not be initialized: %s\n", SDL_GetError());
-		exit(1);
-	}
 
 	window = SDL_CreateWindow("Ores",
 							  SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 							  WIDTH, HEIGHT, SDL_WINDOW_OPENGL);
 
 	if (!window)
-	{
 		printf("Could not create window: %s\n", SDL_GetError());
-		exit(1);
-	}
 
 	m_Renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 	if (!m_Renderer)
-	{
 		printf("Renderer could not be initialized: %s\n", SDL_GetError());
-		exit(1);
-	}
 }
 
 Renderer::~Renderer()

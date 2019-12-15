@@ -55,7 +55,7 @@ void StartGame()
 		for (int j = 1; j <= 8; j++)
 		{
 			// 5% chance to spawn a bomb
-			if (rand() % 100 + 1 <= 5)
+			if (rand() % 100 + 1 <= 2)
 			{
 				toRender.assetPath = "assets/bomb.bmp";
 				toRender.color = "bomb";
@@ -103,7 +103,7 @@ void PushOres()
 	for (int j = 1; j <= 8; j++)
 	{
 		// 5% chance to spawn a bomb
-		if (rand() % 100 + 1 <= 5)
+		if (rand() % 100 + 1 <= 2)
 		{
 			toRender.assetPath = "assets/bomb.bmp";
 			toRender.color = "bomb";
