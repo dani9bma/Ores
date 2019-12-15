@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <ctime>
+#include <string>
 
 #define FLOOR_HEIGHT (HEIGHT - 192)
 
@@ -27,16 +28,12 @@ bool bMainMenu = true;
 bool bGameOver = false;
 bool bIsSoundOn = false;
 
-/* TODO:
-
-	- Add Sound when clicking on ores and removing them
-	- Add a score system
-	- Add a new game over screen showing the score
-
-*/
+int lastScore = 0;
+int score = 0;
 
 void StartGame()
 {
+	score = 0;
 	renderables.clear();
 
 	//rand() results are more random with this
@@ -273,6 +270,8 @@ void CheckForAdjacent(int renderableNum, Renderable& renderableToCheck)
 	// Clear the lastest destroyed renderables
 	renderablesToDestroy.clear();
 
+	Sound click = Sound("assets/click_ores.mp3");
+
 	Renderable r = renderableToCheck, mainRenderable = renderableToCheck;
 	bool end = false;
 
@@ -281,8 +280,15 @@ void CheckForAdjacent(int renderableNum, Renderable& renderableToCheck)
 	GetAdjacent(mainRenderable, Direction::LEFT);
 	GetAdjacent(mainRenderable, Direction::RIGHT);
 
+	if (renderablesToDestroy.size() > 0)
+		click.Play(false);
+
 	for (const Renderable& i : renderablesToDestroy)
+	{
 		renderables.erase(std::remove(renderables.begin(), renderables.end(), i), renderables.end());
+		lastScore = score;
+		score += 20;
+	}
 }
 
 int main(int argc, char *argv[])
@@ -353,15 +359,15 @@ int main(int argc, char *argv[])
 	
 	//Text "When you run out of moves, use the PUSH button"
 	Renderable pushButtonText;
-	pushButtonText.assetPath = "assets/JFRocSol.ttf";
+	pushButtonText.assetPath = "assets/RockFont.ttf";
 	pushButtonText.size = { 500, 40 };
 	pushButtonText.position = { (WIDTH / 2) - (pushButtonText.size.x / 2), (HEIGHT / 2) + SHAPE_SIZE * 2 };
 
-	renderer.CreateText(pushButtonText, TEXT_COLOR, TEXT_COLOR, "When you run out of moves, use the       button", 17);
+	renderer.CreateText(pushButtonText, TEXT_COLOR, TEXT_COLOR, "When you run out of moves, use the           button", 17);
 
 	//Text "Game Over"
 	Renderable gameOverText;
-	gameOverText.assetPath = "assets/JFRocSol.ttf";
+	gameOverText.assetPath = "assets/RockFont.ttf";
 	gameOverText.size = { 300, 90 };
 	gameOverText.position.x = gameOverText.size.x / 2;
 	gameOverText.position.y = gameOverText.size.y / 2;
@@ -370,21 +376,44 @@ int main(int argc, char *argv[])
 
 	//Text "Play Game"
 	Renderable mainMenuText;
-	mainMenuText.assetPath = "assets/JFRocSol.ttf";
+	mainMenuText.assetPath = "assets/RockFont.ttf";
 	mainMenuText.size = { 300, 90 };
 	mainMenuText.position.x = (WIDTH / 2) - (mainMenuText.size.x / 2);
 	mainMenuText.position.y = (HEIGHT / 2) - (mainMenuText.size.y / 2);
 
 	renderer.CreateText(mainMenuText, TEXT_COLOR, TEXT_COLOR_OVER, "Play Game", 24);
 
+	//Text "Score"
+	Renderable scoreText;
+	scoreText.assetPath = "assets/RockFont.ttf";
+	scoreText.size = { 200, 60 };
+	scoreText.position.x = WIDTH / 2 - scoreText.size.x ;
+	scoreText.position.y = SHAPE_SIZE / 2;
+
+	std::string scoreStr = "Score : ";
+	scoreStr.append(std::to_string(score));
+	renderer.CreateText(scoreText, TEXT_COLOR, TEXT_COLOR, scoreStr.c_str(), 20);
+
+	//Text "Score"(Game Over menu)
+	Renderable scoreTextGO;
+	scoreTextGO.assetPath = "assets/RockFont.ttf";
+	scoreTextGO.size = { 400, 60 };
+	scoreTextGO.position.x = scoreTextGO.size.x / 4;
+	scoreTextGO.position.y = gameOverText.size.y + scoreTextGO.size.y;
+
+	std::string scoreStrGO = "Your score was : ";
+	scoreStrGO.append(std::to_string(score));
+	renderer.CreateText(scoreTextGO, TEXT_COLOR, TEXT_COLOR, scoreStrGO.c_str(), 20);
+
 	//Text "Play Again"
 	Renderable playAgainText;
-	playAgainText.assetPath = "assets/JFRocSol.ttf";
+	playAgainText.assetPath = "assets/RockFont.ttf";
 	playAgainText.size = { 200, 60 };
 	playAgainText.position.x = playAgainText.size.x;
-	playAgainText.position.y = gameOverText.size.y + playAgainText.size.y;
+	playAgainText.position.y = gameOverText.size.y + playAgainText.size.y + scoreTextGO.size.y;
 
 	renderer.CreateText(playAgainText, TEXT_COLOR, TEXT_COLOR_OVER, "Play Again", 20);
+
 
 	//Audio
 	Sound background = Sound("assets/background.mp3");
@@ -548,8 +577,26 @@ int main(int argc, char *argv[])
 
 			renderer.Draw(soundButton);
 
+			// Update the score text if the score is diferent from the last one
+			// because if we are always updating the text it will be causing some
+			// performance issues
+			if (lastScore != score)
+			{
+				scoreStr = "Score : ";
+				scoreStr.append(std::to_string(score));
+				renderer.CreateText(scoreText, TEXT_COLOR, TEXT_COLOR, scoreStr.c_str(), 20);
+
+				scoreStrGO = "Your score was : ";
+				scoreStrGO.append(std::to_string(score));
+				renderer.CreateText(scoreTextGO, TEXT_COLOR, TEXT_COLOR, scoreStrGO.c_str(), 20);
+
+				lastScore = score;
+			}
+
+
 			if (!bMainMenu && !bGameOver)
 			{
+				renderer.Draw(scoreText);
 				renderer.Draw(restartButton);
 				renderer.Draw(pushButton);
 			}
@@ -558,6 +605,7 @@ int main(int argc, char *argv[])
 			{
 				renderer.Draw(gameOverText);
 				renderer.Draw(playAgainText);
+				renderer.Draw(scoreTextGO);
 			}
 
 			renderer.Update();
