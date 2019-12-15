@@ -31,9 +31,17 @@ bool bIsSoundOn = true;
 int lastScore = 0;
 int score = 0;
 
+Renderable scoreTextGO;
+Renderable scoreText;
+
 void StartGame()
 {
 	score = 0;
+
+	std::string scoreStr = "Score : ";
+	scoreStr.append(std::to_string(score));
+	renderer.CreateText(scoreText, TEXT_COLOR, TEXT_COLOR, scoreStr.c_str(), 20);
+
 	renderables.clear();
 
 	//rand() results are more random with this
@@ -144,6 +152,10 @@ void CheckEndZone()
 		{
 			renderable.position.y += 7;
 			bGameOver = true;
+
+			std::string scoreStrGO = "Your score was : ";
+			scoreStrGO.append(std::to_string(score));
+			renderer.CreateText(scoreTextGO, TEXT_COLOR, TEXT_COLOR, scoreStrGO.c_str(), 20);
 		}
 	}
 }
@@ -365,7 +377,6 @@ void CheckForAdjacent(int renderableNum, Renderable renderableToCheck)
 	}
 	else
 	{
-
 		Renderable r = renderableToCheck, mainRenderable = renderableToCheck;
 
 		GetAdjacent(mainRenderable, Direction::UP);
@@ -375,7 +386,7 @@ void CheckForAdjacent(int renderableNum, Renderable renderableToCheck)
 
 	}
 
-	if (renderablesToDestroy.size() > 0)
+	if (renderablesToDestroy.size() > 0 && bIsSoundOn)
 		click.Play();
 
 	for (const Renderable& i : renderablesToDestroy)
@@ -384,6 +395,10 @@ void CheckForAdjacent(int renderableNum, Renderable renderableToCheck)
 		lastScore = score;
 		score += 20;
 	}
+
+	std::string scoreStr = "Score : ";
+	scoreStr.append(std::to_string(score));
+	renderer.CreateText(scoreText, TEXT_COLOR, TEXT_COLOR, scoreStr.c_str(), 20);
 }
 
 int main(int argc, char *argv[])
@@ -479,7 +494,6 @@ int main(int argc, char *argv[])
 	renderer.CreateText(mainMenuText, TEXT_COLOR, TEXT_COLOR_OVER, "Play Game", 24);
 
 	//Text "Score"
-	Renderable scoreText;
 	scoreText.assetPath = "assets/RockFont.ttf";
 	scoreText.size = { 200, 60 };
 	scoreText.position.x = WIDTH / 2 - scoreText.size.x ;
@@ -490,15 +504,10 @@ int main(int argc, char *argv[])
 	renderer.CreateText(scoreText, TEXT_COLOR, TEXT_COLOR, scoreStr.c_str(), 20);
 
 	//Text "Score"(Game Over menu)
-	Renderable scoreTextGO;
 	scoreTextGO.assetPath = "assets/RockFont.ttf";
 	scoreTextGO.size = { 400, 60 };
 	scoreTextGO.position.x = scoreTextGO.size.x / 4;
 	scoreTextGO.position.y = gameOverText.size.y + scoreTextGO.size.y;
-
-	std::string scoreStrGO = "Your score was : ";
-	scoreStrGO.append(std::to_string(score));
-	renderer.CreateText(scoreTextGO, TEXT_COLOR, TEXT_COLOR, scoreStrGO.c_str(), 20);
 
 	//Text "Play Again"
 	Renderable playAgainText;
@@ -508,7 +517,6 @@ int main(int argc, char *argv[])
 	playAgainText.position.y = gameOverText.size.y + playAgainText.size.y + scoreTextGO.size.y;
 
 	renderer.CreateText(playAgainText, TEXT_COLOR, TEXT_COLOR_OVER, "Play Again", 20);
-
 
 	//Audio
 	Music background = Music("assets/background.mp3");
@@ -541,6 +549,7 @@ int main(int argc, char *argv[])
 			if (SDL_PollEvent(&event)) {
 				if (event.type == SDL_QUIT)
 					bIsRunning = false;
+
 				if (event.type == SDL_MOUSEBUTTONDOWN)
 				{
 					if (event.button.button == SDL_BUTTON_LEFT)
@@ -671,22 +680,6 @@ int main(int argc, char *argv[])
 			}
 
 			renderer.Draw(soundButton);
-
-			// Update the score text if the score is diferent from the last one
-			// because if we are always updating the text it will be causing some
-			// performance issues
-			if (lastScore != score)
-			{
-				scoreStr = "Score : ";
-				scoreStr.append(std::to_string(score));
-				renderer.CreateText(scoreText, TEXT_COLOR, TEXT_COLOR, scoreStr.c_str(), 20);
-
-				scoreStrGO = "Your score was : ";
-				scoreStrGO.append(std::to_string(score));
-				renderer.CreateText(scoreTextGO, TEXT_COLOR, TEXT_COLOR, scoreStrGO.c_str(), 20);
-
-				lastScore = score;
-			}
 
 
 			if (!bMainMenu && !bGameOver)
