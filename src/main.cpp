@@ -19,6 +19,8 @@
 
 #define MAX_FRAMERATE 60
 
+#define BOMB_CHANCE 3
+
 //Global Variables
 Renderer renderer;
 std::vector<Renderable> renderables;
@@ -27,6 +29,7 @@ bool bIsRunning = true;
 bool bMainMenu = true;
 bool bGameOver = false;
 bool bIsSoundOn = true;
+bool bIsEveryRenderableOnGround = true;
 
 int lastScore = 0;
 int score = 0;
@@ -55,7 +58,7 @@ void StartGame()
 		for (int j = 1; j <= 8; j++)
 		{
 			// 5% chance to spawn a bomb
-			if (rand() % 100 + 1 <= 2)
+			if (rand() % 100 + 1 <= BOMB_CHANCE)
 			{
 				toRender.assetPath = "assets/bomb.bmp";
 				toRender.color = "bomb";
@@ -103,7 +106,7 @@ void PushOres()
 	for (int j = 1; j <= 8; j++)
 	{
 		// 5% chance to spawn a bomb
-		if (rand() % 100 + 1 <= 2)
+		if (rand() % 100 + 1 <= BOMB_CHANCE)
 		{
 			toRender.assetPath = "assets/bomb.bmp";
 			toRender.color = "bomb";
@@ -150,15 +153,20 @@ void CheckEndZone()
 {
 	for (Renderable& renderable : renderables)
 	{
-		if (renderable.position.x < END_ZONE) 
+		if (renderable.position.x < END_ZONE)
 		{
 			renderable.position.y += 7;
-			bGameOver = true;
 
-			// Create the game over score string
-			std::string scoreStrGO = "Your score was : ";
-			scoreStrGO.append(std::to_string(score));
-			renderer.CreateText(scoreTextGO, TEXT_COLOR, TEXT_COLOR, scoreStrGO.c_str(), 20);
+			// Just make the texture the first time it hits game over
+			if (!bGameOver)
+			{
+				// Create the game over score string
+				std::string scoreStrGO = "Your score was : ";
+				scoreStrGO.append(std::to_string(score));
+				renderer.CreateText(scoreTextGO, TEXT_COLOR, TEXT_COLOR, scoreStrGO.c_str(), 20);
+			}
+
+			bGameOver = true;
 		}
 	}
 }
@@ -558,7 +566,7 @@ int main(int argc, char *argv[])
 				{
 					if (event.button.button == SDL_BUTTON_LEFT)
 					{
-						if (!bGameOver && !bMainMenu)
+						if (!bGameOver && !bMainMenu && bIsEveryRenderableOnGround)
 						{
 							for (int i = 0; i < renderables.size(); i++)
 							{
@@ -638,7 +646,7 @@ int main(int argc, char *argv[])
 			if (!bMainMenu)
 			{
 				int numRenderables = 0;
-				bool bIsEveryRenderableOnGround = true;
+				bIsEveryRenderableOnGround = true;
 				for (int i = 0; i < renderables.size(); i++)
 				{
 					Renderable& renderable = renderables[i];
