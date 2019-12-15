@@ -44,6 +44,62 @@ void StartGame()
 	{
 		for (int j = 1; j <= 8; j++)
 		{
+			// 5% chance to spawn a bomb
+			if (rand() % 100 + 1 <= 5)
+			{
+				toRender.assetPath = "assets/bomb.bmp";
+				toRender.color = "bomb";
+			}
+			else
+			{
+				switch (rand() % 5 + 1)
+				{
+				case 1:
+					toRender.assetPath = "assets/green_ore.bmp";
+					toRender.color = "green";
+					break;
+				case 2:
+					toRender.assetPath = "assets/red_ore.bmp";
+					toRender.color = "red";
+					break;
+				case 3:
+					toRender.assetPath = "assets/yellow_ore.bmp";
+					toRender.color = "yellow";
+					break;
+				case 4:
+					toRender.assetPath = "assets/blue_ore.bmp";
+					toRender.color = "blue";
+					break;
+				case 5:
+					toRender.assetPath = "assets/grey_ore.bmp";
+					toRender.color = "grey";
+					break;
+				}
+			}
+
+			toRender.position.x = (SPAWN_POINT + (SHAPE_SIZE * i));
+			// Put the y 2 renderables above so that we can make the animation of them falling
+			toRender.position.y = ((FLOOR_HEIGHT)-(SHAPE_SIZE * j)) - SHAPE_SIZE * 2;
+			toRender.size = { SHAPE_SIZE, SHAPE_SIZE };
+			renderer.CreateRenderable(toRender);
+			renderables.push_back(toRender);
+		}
+	}
+}
+
+void PushOres()
+{
+	Renderable toRender;
+	for (int j = 1; j <= 8; j++)
+	{
+		// 5% chance to spawn a bomb
+		if (rand() % 100 + 1 <= 5)
+		{
+			toRender.assetPath = "assets/bomb.bmp";
+			toRender.color = "bomb";
+		}
+		else
+		{
 			switch (rand() % 5 + 1)
 			{
 			case 1:
@@ -67,44 +123,6 @@ void StartGame()
 				toRender.color = "grey";
 				break;
 			}
-
-			toRender.position.x = (SPAWN_POINT + (SHAPE_SIZE * i));
-			// Put the y 2 renderables above so that we can make the animation of them falling
-			toRender.position.y = ((FLOOR_HEIGHT)-(SHAPE_SIZE * j)) - SHAPE_SIZE * 2;
-			toRender.size = { SHAPE_SIZE, SHAPE_SIZE };
-			renderer.CreateRenderable(toRender);
-			renderables.push_back(toRender);
-		}
-	}
-}
-
-void PushOres()
-{
-	Renderable toRender;
-	for (int j = 1; j <= 8; j++)
-	{
-		switch (rand() % 5 + 1)
-		{
-		case 1:
-			toRender.assetPath = "assets/green_ore.bmp";
-			toRender.color = "green";
-			break;
-		case 2:
-			toRender.assetPath = "assets/red_ore.bmp";
-			toRender.color = "red";
-			break;
-		case 3:
-			toRender.assetPath = "assets/yellow_ore.bmp";
-			toRender.color = "yellow";
-			break;
-		case 4:
-			toRender.assetPath = "assets/blue_ore.bmp";
-			toRender.color = "blue";
-			break;
-		case 5:
-			toRender.assetPath = "assets/grey_ore.bmp";
-			toRender.color = "grey";
-			break;
 		}
 
 		toRender.position.x = WIDTH;
@@ -265,20 +283,97 @@ void GetAdjacent(Renderable renderable, Direction direction)
 	}
 }
 
-void CheckForAdjacent(int renderableNum, Renderable& renderableToCheck)
+void CheckForAdjacent(int renderableNum, Renderable renderableToCheck)
 {
 	// Clear the lastest destroyed renderables
 	renderablesToDestroy.clear();
 
 	Sound click = Sound("assets/click_ores.mp3");
+	if (renderableToCheck.color == "bomb")
+	{
+		click = Sound("assets/click_bomb.mp3");
 
-	Renderable r = renderableToCheck, mainRenderable = renderableToCheck;
-	bool end = false;
+		// RIGHT
+		Renderable r = renderableToCheck;
+		r.position.x += SHAPE_SIZE;
 
-	GetAdjacent(mainRenderable, Direction::UP);
-	GetAdjacent(mainRenderable, Direction::DOWN);
-	GetAdjacent(mainRenderable, Direction::LEFT);
-	GetAdjacent(mainRenderable, Direction::RIGHT);
+		auto it = std::find(renderables.begin(), renderables.end(), r);
+		if (it != renderables.end())
+			DestroyRenderable(r);
+
+		// LEFT
+		r = renderableToCheck;
+		r.position.x -= SHAPE_SIZE;
+
+		it = std::find(renderables.begin(), renderables.end(), r);
+		if (it != renderables.end())
+			DestroyRenderable(r);
+
+		// UP
+		r = renderableToCheck;
+		r.position.y -= SHAPE_SIZE;
+
+		it = std::find(renderables.begin(), renderables.end(), r);
+		if (it != renderables.end())
+			DestroyRenderable(r);
+
+		// DOWN
+		r = renderableToCheck;
+		r.position.y += SHAPE_SIZE;
+
+		it = std::find(renderables.begin(), renderables.end(), r);
+		if (it != renderables.end())
+			DestroyRenderable(r);
+
+		// UP RIGHT
+		r = renderableToCheck;
+		r.position.x += SHAPE_SIZE;
+		r.position.y -= SHAPE_SIZE;
+
+		it = std::find(renderables.begin(), renderables.end(), r);
+		if (it != renderables.end())
+			DestroyRenderable(r);
+
+		// UP LEFT
+		r = renderableToCheck;
+		r.position.x -= SHAPE_SIZE;
+		r.position.y -= SHAPE_SIZE;
+
+		it = std::find(renderables.begin(), renderables.end(), r);
+		if (it != renderables.end())
+			DestroyRenderable(r);
+
+		// DOWN RIGHT
+		r = renderableToCheck;
+		r.position.x += SHAPE_SIZE;
+		r.position.y += SHAPE_SIZE;
+
+		it = std::find(renderables.begin(), renderables.end(), r);
+		if (it != renderables.end())
+			DestroyRenderable(r);
+
+		// DOWN LEFT
+		r = renderableToCheck;
+		r.position.x -= SHAPE_SIZE;
+		r.position.y += SHAPE_SIZE;
+
+		it = std::find(renderables.begin(), renderables.end(), r);
+		if (it != renderables.end())
+			DestroyRenderable(r);
+
+		DestroyRenderable(renderableToCheck);
+	}
+	else
+	{
+
+		Renderable r = renderableToCheck, mainRenderable = renderableToCheck;
+
+		GetAdjacent(mainRenderable, Direction::UP);
+		GetAdjacent(mainRenderable, Direction::DOWN);
+		GetAdjacent(mainRenderable, Direction::LEFT);
+		GetAdjacent(mainRenderable, Direction::RIGHT);
+
+	}
 
 	if (renderablesToDestroy.size() > 0)
 		click.Play(false);
