@@ -37,15 +37,19 @@ int score = 0;
 Renderable scoreTextGO;
 Renderable scoreText;
 
-void StartGame()
+void UpdateScore()
 {
-	// Reset score
-	score = 0;
-
 	// Update Score string
 	std::string scoreStr = "Score : ";
 	scoreStr.append(std::to_string(score));
 	renderer.CreateText(scoreText, TEXT_COLOR, TEXT_COLOR, scoreStr.c_str(), 20);
+}
+
+void StartGame()
+{
+	// Reset score
+	score = 0;
+	UpdateScore();
 
 	renderables.clear();
 
@@ -308,11 +312,11 @@ void GetAdjacent(Renderable renderable, Direction direction)
 
 void CheckForAdjacent(int renderableNum, Renderable renderableToCheck)
 {
-	// Clear the lastest destroyed renderables
+	// Clear the last destroyed renderables
 	renderablesToDestroy.clear();
 
 	SoundEffect click = SoundEffect("assets/click_ores.wav");
-	if (renderableToCheck.color == "bomb")
+	if (strcmp(renderableToCheck.color, "bomb") == 0)
 	{
 		click = SoundEffect("assets/click_bomb.wav");
 
@@ -407,10 +411,7 @@ void CheckForAdjacent(int renderableNum, Renderable renderableToCheck)
 		score += 20;
 	}
 
-	// Update score
-	std::string scoreStr = "Score : ";
-	scoreStr.append(std::to_string(score));
-	renderer.CreateText(scoreText, TEXT_COLOR, TEXT_COLOR, scoreStr.c_str(), 20);
+	UpdateScore();
 }
 
 int main(int argc, char *argv[])

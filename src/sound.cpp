@@ -18,6 +18,8 @@ void Music::Play(bool loop)
 {
 	if (Mix_PlayMusic(m_Sound, loop ? -1 : 0) == -1)
 		printf("Could not play sound: %s\n", SDL_GetError());
+
+	Mix_VolumeMusic(20);
 }
 
 void Music::Pause()
@@ -41,4 +43,6 @@ void SoundEffect::Play()
 {
 	if (Mix_PlayChannel(-1, m_Sound, 0) == -1)
 		printf("Could not play sound: %s\n", SDL_GetError());
+
+	Mix_VolumeChunk(m_Sound, 20);
 }
