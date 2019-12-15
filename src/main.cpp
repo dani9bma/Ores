@@ -61,7 +61,7 @@ void StartGame()
 	{
 		for (int j = 1; j <= 8; j++)
 		{
-			// 5% chance to spawn a bomb
+			// chance to spawn a bomb
 			if (rand() % 100 + 1 <= BOMB_CHANCE)
 			{
 				toRender.assetPath = "assets/bomb.bmp";
@@ -559,7 +559,8 @@ int main(int argc, char *argv[])
 			lastFrame = time;
 
 			SDL_Event event;
-			if (SDL_PollEvent(&event)) {
+			if (SDL_PollEvent(&event)) 
+			{
 				if (event.type == SDL_QUIT)
 					bIsRunning = false;
 
@@ -567,6 +568,10 @@ int main(int argc, char *argv[])
 				{
 					if (event.button.button == SDL_BUTTON_LEFT)
 					{
+						// Check if the player is click on a block if
+						// the game isn't over, the main menu is not showing and
+						// every renderable are on the ground because if not
+						// it will check the blocks around while on the air
 						if (!bGameOver && !bMainMenu && bIsEveryRenderableOnGround)
 						{
 							for (int i = 0; i < renderables.size(); i++)
@@ -578,15 +583,18 @@ int main(int argc, char *argv[])
 							}
 						}
 
+						// Push Button Click
 						if (pushButton.IsMouseOver() && !bGameOver && !bMainMenu)
 						{
 							PushOres();
 							timeInGame = 0;
 						}
 
+						// Start Game click
 						if (mainMenuText.IsMouseOver() && bMainMenu)
 							bMainMenu = false;
 
+						// Restart Button Click
 						if (restartButton.IsMouseOver() && !bMainMenu)
 						{
 							StartGame();
@@ -594,12 +602,14 @@ int main(int argc, char *argv[])
 							timeInGame = 0;
 						}
 
+						// Play again Button Click
 						if (playAgainText.IsMouseOver() && bGameOver)
 						{
 							StartGame();
 							bGameOver = false;
 						}
 
+						// Sound Button Click
 						if (soundButton.IsMouseOver())
 						{
 							if (bIsSoundOn)
