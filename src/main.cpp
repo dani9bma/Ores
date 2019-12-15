@@ -29,7 +29,6 @@ bool bIsSoundOn = false;
 
 /* TODO:
 
-	- Make a tutorial like thing to show that the user can click on the push arrow when he doesnt have any more options
 	- Add Sound when clicking on ores and removing them
 	- Add a score system
 	- Add a new game over screen showing the score
@@ -336,6 +335,14 @@ int main(int argc, char *argv[])
 
 	renderer.CreateRenderable(pushButton);
 
+	//Push Button(Main Menu)
+	Renderable pushButtonMM;
+	pushButtonMM.size = { SHAPE_SIZE, SHAPE_SIZE };
+	pushButtonMM.position = { (WIDTH / 2) + 125, ((HEIGHT / 2) + SHAPE_SIZE * 2) - 10 };
+	pushButtonMM.assetPath = "assets/buttonPush.bmp";
+
+	renderer.CreateRenderable(pushButtonMM);
+
 	//Sound Button
 	Renderable soundButton;
 	soundButton.size = { SHAPE_SIZE, SHAPE_SIZE };
@@ -344,12 +351,20 @@ int main(int argc, char *argv[])
 
 	renderer.CreateRenderable(soundButton);
 	
+	//Text "When you run out of moves, use the PUSH button"
+	Renderable pushButtonText;
+	pushButtonText.assetPath = "assets/JFRocSol.ttf";
+	pushButtonText.size = { 500, 40 };
+	pushButtonText.position = { (WIDTH / 2) - (pushButtonText.size.x / 2), (HEIGHT / 2) + SHAPE_SIZE * 2 };
+
+	renderer.CreateText(pushButtonText, TEXT_COLOR, TEXT_COLOR, "When you run out of moves, use the       button", 17);
+
 	//Text "Game Over"
 	Renderable gameOverText;
 	gameOverText.assetPath = "assets/JFRocSol.ttf";
 	gameOverText.size = { 300, 90 };
-	gameOverText.position.x = (WIDTH / 2) - (gameOverText.size.x / 2);
-	gameOverText.position.y = (HEIGHT / 2) - (gameOverText.size.y / 2);
+	gameOverText.position.x = gameOverText.size.x / 2;
+	gameOverText.position.y = gameOverText.size.y / 2;
 
 	renderer.CreateText(gameOverText, TEXT_COLOR, TEXT_COLOR, "Game Over", 24);
 
@@ -365,9 +380,9 @@ int main(int argc, char *argv[])
 	//Text "Play Again"
 	Renderable playAgainText;
 	playAgainText.assetPath = "assets/JFRocSol.ttf";
-	playAgainText.size = { 200, 70 };
-	playAgainText.position.x = (WIDTH / 2) - (playAgainText.size.x / 2);
-	playAgainText.position.y = ((HEIGHT / 2) - (playAgainText.size.y / 2)) + playAgainText.size.y;
+	playAgainText.size = { 200, 60 };
+	playAgainText.position.x = playAgainText.size.x;
+	playAgainText.position.y = gameOverText.size.y + playAgainText.size.y;
 
 	renderer.CreateText(playAgainText, TEXT_COLOR, TEXT_COLOR_OVER, "Play Again", 20);
 
@@ -527,6 +542,8 @@ int main(int argc, char *argv[])
 			{
 				renderer.Draw(startMenuBackground);
 				renderer.Draw(mainMenuText);
+				renderer.Draw(pushButtonText);
+				renderer.Draw(pushButtonMM);
 			}
 
 			renderer.Draw(soundButton);
@@ -540,7 +557,6 @@ int main(int argc, char *argv[])
 			if (bGameOver)
 			{
 				renderer.Draw(gameOverText);
-
 				renderer.Draw(playAgainText);
 			}
 
