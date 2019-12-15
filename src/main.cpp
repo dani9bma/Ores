@@ -26,7 +26,7 @@ std::vector<Renderable> renderables;
 bool bIsRunning = true;
 bool bMainMenu = true;
 bool bGameOver = false;
-bool bIsSoundOn = false;
+bool bIsSoundOn = true;
 
 int lastScore = 0;
 int score = 0;
@@ -288,10 +288,10 @@ void CheckForAdjacent(int renderableNum, Renderable renderableToCheck)
 	// Clear the lastest destroyed renderables
 	renderablesToDestroy.clear();
 
-	Sound click = Sound("assets/click_ores.mp3");
+	SoundEffect click = SoundEffect("assets/click_ores.wav");
 	if (renderableToCheck.color == "bomb")
 	{
-		click = Sound("assets/click_bomb.mp3");
+		click = SoundEffect("assets/click_bomb.wav");
 
 		// RIGHT
 		Renderable r = renderableToCheck;
@@ -376,7 +376,7 @@ void CheckForAdjacent(int renderableNum, Renderable renderableToCheck)
 	}
 
 	if (renderablesToDestroy.size() > 0)
-		click.Play(false);
+		click.Play();
 
 	for (const Renderable& i : renderablesToDestroy)
 	{
@@ -511,7 +511,7 @@ int main(int argc, char *argv[])
 
 
 	//Audio
-	Sound background = Sound("assets/background.mp3");
+	Music background = Music("assets/background.mp3");
 
 	if(bIsSoundOn)
 		background.Play(true);
@@ -525,8 +525,8 @@ int main(int argc, char *argv[])
 
 	StartGame();
 
-	while (bIsRunning) {
-
+	while (bIsRunning) 
+	{
 		time = (float)SDL_GetTicks();
 		timestep = time - lastFrame;
 

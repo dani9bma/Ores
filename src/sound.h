@@ -2,10 +2,10 @@
 
 #include <SDL_mixer.h>
 
-class Sound
+class Music
 {
 public:
-	Sound(const char* path);
+	Music(const char* path);
 
 	void Destroy();
 
@@ -14,4 +14,16 @@ public:
 
 private:
 	Mix_Music* m_Sound;
+};
+
+class SoundEffect
+{
+public:
+	SoundEffect(const char* path);
+
+	void Destroy();
+
+	void Play();
+private:
+	Mix_Chunk* m_Sound;
 };
