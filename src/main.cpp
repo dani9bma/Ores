@@ -14,7 +14,7 @@
 #define SPAWN_POINT (WIDTH - (SHAPE_SIZE * 8))
 #define END_ZONE (WIDTH - (SHAPE_SIZE * 15))
 
-#define TEXT_COLOR { 155, 135, 12 }
+#define TEXT_COLOR { 206, 178, 16 }
 #define TEXT_COLOR_OVER { 105, 85, 0 }
 
 #define MAX_FRAMERATE 60
@@ -500,7 +500,7 @@ int main(int argc, char *argv[])
 	//Text "Play Game"
 	Renderable mainMenuText;
 	mainMenuText.assetPath = "assets/RockFont.ttf";
-	mainMenuText.size = { 300, 90 };
+	mainMenuText.size = { 300, 80 };
 	mainMenuText.position.x = (WIDTH / 2) - (mainMenuText.size.x / 2);
 	mainMenuText.position.y = (HEIGHT / 2) - (mainMenuText.size.y / 2);
 
@@ -525,11 +525,27 @@ int main(int argc, char *argv[])
 	//Text "Play Again"
 	Renderable playAgainText;
 	playAgainText.assetPath = "assets/RockFont.ttf";
-	playAgainText.size = { 200, 60 };
+	playAgainText.size = { 200, 50 };
 	playAgainText.position.x = playAgainText.size.x;
-	playAgainText.position.y = gameOverText.size.y + playAgainText.size.y + scoreTextGO.size.y;
+	playAgainText.position.y = gameOverText.size.y + playAgainText.size.y + scoreTextGO.size.y * 2;
 
 	renderer.CreateText(playAgainText, TEXT_COLOR, TEXT_COLOR_OVER, "Play Again", 20);
+
+	// MainMenu Button border
+	Renderable border;
+	border.assetPath = "assets/border.bmp";
+	border.size = { mainMenuText.size.x + 60, mainMenuText.size.y + 50 };
+	border.position = { mainMenuText.position.x - 30, mainMenuText.position.y - 20 };
+
+	renderer.CreateRenderable(border);
+
+	// Play Again Button border
+	Renderable borderPlayAgain;
+	borderPlayAgain.assetPath = "assets/border.bmp";
+	borderPlayAgain.size = { playAgainText.size.x + 50, playAgainText.size.y + 40 };
+	borderPlayAgain.position = { playAgainText.position.x - 25, playAgainText.position.y - 15 };
+
+	renderer.CreateRenderable(borderPlayAgain);
 
 	//Audio
 	Music background = Music("assets/background.mp3");
@@ -697,6 +713,7 @@ int main(int argc, char *argv[])
 			if (bMainMenu)
 			{
 				renderer.Draw(startMenuBackground);
+				renderer.Draw(border);
 				renderer.Draw(mainMenuText);
 				renderer.Draw(pushButtonText);
 				renderer.Draw(pushButtonMM);
@@ -714,6 +731,7 @@ int main(int argc, char *argv[])
 
 			if (bGameOver)
 			{
+				renderer.Draw(borderPlayAgain);
 				renderer.Draw(gameOverText);
 				renderer.Draw(playAgainText);
 				renderer.Draw(scoreTextGO);
