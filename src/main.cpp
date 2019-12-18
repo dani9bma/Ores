@@ -448,18 +448,10 @@ int main(int argc, char *argv[])
 
 	renderer.CreateRenderable(cloud);
 
-	//Restart Button
-	Renderable restartButton;
-	restartButton.size = { SHAPE_SIZE, SHAPE_SIZE };
-	restartButton.position = {WIDTH - (SHAPE_SIZE * 2), HEIGHT - SHAPE_SIZE};
-	restartButton.assetPath = "assets/restart_button.bmp";
-
-	renderer.CreateRenderable(restartButton);
-
 	//Push Button
 	Renderable pushButton;
 	pushButton.size = { SHAPE_SIZE, SHAPE_SIZE };
-	pushButton.position = { WIDTH - (SHAPE_SIZE * 3), HEIGHT - SHAPE_SIZE };
+	pushButton.position = { WIDTH - (SHAPE_SIZE * 2), HEIGHT - SHAPE_SIZE };
 	pushButton.assetPath = "assets/buttonPush.bmp";
 
 	renderer.CreateRenderable(pushButton);
@@ -479,7 +471,15 @@ int main(int argc, char *argv[])
 	soundButton.assetPath = "assets/buttonSoundOn.bmp";
 
 	renderer.CreateRenderable(soundButton);
-	
+
+	//End zone
+	Renderable endZone;
+	endZone.size = { 30, 720 };
+	endZone.position = { END_ZONE - 16, 0 };
+	endZone.assetPath = "assets/end_zone.bmp";
+
+	renderer.CreateRenderable(endZone);
+
 	//Text "When you run out of moves, use the PUSH button"
 	Renderable pushButtonText;
 	pushButtonText.assetPath = "assets/RockFont.ttf";
@@ -610,19 +610,12 @@ int main(int argc, char *argv[])
 						if (mainMenuText.IsMouseOver() && bMainMenu)
 							bMainMenu = false;
 
-						// Restart Button Click
-						if (restartButton.IsMouseOver() && !bMainMenu)
-						{
-							StartGame();
-							bGameOver = false;
-							timeInGame = 0;
-						}
-
 						// Play again Button Click
 						if (playAgainText.IsMouseOver() && bGameOver)
 						{
 							StartGame();
 							bGameOver = false;
+							timeInGame = 0;
 						}
 
 						// Sound Button Click
@@ -657,9 +650,11 @@ int main(int argc, char *argv[])
 			renderer.Draw(cloud);
 			cloud.position.x -= cloud.size.x - 250;
 			renderer.Draw(cloud);
-			cloud.position.x -= cloud.size.x - 50;
+			cloud.position.x -= cloud.size.x - 40;
 			renderer.Draw(cloud);
 			cloud.position.x = WIDTH - cloud.size.x;
+
+			renderer.Draw(endZone);
 
 			// See if it is time to push the blocks
 			// See if the time that has passed is equal to MAX_FRAMERATE(1s) times the amount of seconds to wait to push
@@ -725,7 +720,6 @@ int main(int argc, char *argv[])
 			if (!bMainMenu && !bGameOver)
 			{
 				renderer.Draw(scoreText);
-				renderer.Draw(restartButton);
 				renderer.Draw(pushButton);
 			}
 
